@@ -36,9 +36,21 @@ void Viewer::setVoxmap(Voxmap *vm) {
 }
 
 void Viewer::mouseMoveEvent(QMouseEvent *e) {
-  if (dragbutton==Qt::LeftButton) {
+  if (dragbutton==Qt::LeftButton && dragmods==Qt::NoModifier) {
     QPoint delta = e->pos() - dragbase;
     t.shift(-delta.x()*1./hidpi_, -delta.y()*1./hidpi_, 0);
+    dragbase = e->pos();
+    rebuild();
+  } else if (dragbutton==Qt::LeftButton && dragmods==Qt::ControlModifier) {
+    QPoint delta = e->pos() - dragbase;
+    t.rotate(-delta.x()/200./hidpi_, -delta.y()/200./hidpi_,
+	     e->pos().x()*1./hidpi_, e->pos().y()*1./hidpi_);
+    dragbase = e->pos();
+    rebuild();
+  } else if (dragbutton==Qt::LeftButton && dragmods==Qt::ShiftModifier) {
+    QPoint delta = e->pos() - dragbase;
+    t.rotatez(-delta.x()/200./hidpi_,
+	      e->pos().x()*1./hidpi_, e->pos().y()*1./hidpi_);
     dragbase = e->pos();
     rebuild();
   }

@@ -20,10 +20,12 @@ public:
     
   void shift(float dx, float dy, float dz); // screen coords
   void rotate(float dxz, float dyz, float x0, float y0);
+  void rotatez(float dxy, float x0, float y0);
 public:
   static Transform3 shifter(float dx, float dy, float dz);
   static Transform3 xrotator(float dxz);
   static Transform3 yrotator(float dyz);
+  static Transform3 zrotator(float dxy);
 private:
   float m[4][4];
   friend Transform3 operator*(Transform3 const &, Transform3 const &);

@@ -2,6 +2,7 @@
 
 #include "Transform3.h"
 #include <math.h>
+#include <QDebug>
 
 Transform3::Transform3() {
   for (int k=0; k<4; k++)
@@ -35,6 +36,15 @@ Transform3 Transform3::yrotator(float dyz) {
   return mm;
 }
 
+Transform3 Transform3::zrotator(float dxy) {
+  Transform3 mm;
+  mm.m[0][0] = cos(dxy);
+  mm.m[1][1] = cos(dxy);
+  mm.m[1][0] = sin(dxy);
+  mm.m[0][1] = -sin(dxy);
+  return mm;
+}
+
 Transform3 operator*(Transform3 const &l, Transform3 const &r) {
   Transform3 res;
   for (int n=0; n<4; n++) {
@@ -57,5 +67,18 @@ void Transform3::rotate(float dxz, float dyz, float x0, float y0) {
   *this = *this * xrotator(dxz);
   *this = *this * yrotator(dyz);
   *this = *this * shifter(x0, y0, 0);
+}
+
+void Transform3::rotatez(float dxy, float x0, float y0) {
+  // I want to rotate such that the mapping of (x0,y0,0) is unchanged.
+  qDebug() << "rotatez" << dxy << x0 << y0;
+  qDebug() << m[0][3] << m[1][3] << m[2][3];
+  *this = *this * shifter(-x0, -y0, 0);
+  Point3 dest = apply(Point3(0,0,0));
+  *this = shifter(-dest.x, -dest.y, -dest.z) * *this;
+  *this = *this * zrotator(dxy);
+  *this = shifter(dest.x, dest.y, dest.z) * *this;
+  *this = *this * shifter(x0, y0, 0);
+  qDebug() << m[0][3] << m[1][3] << m[2][3];
 }
 
