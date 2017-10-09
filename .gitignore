@@ -1,0 +1,5 @@
+*.o
+*~
+src/Makefile
+.qmake.stash
+gvox
