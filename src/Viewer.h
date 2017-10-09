@@ -4,6 +4,7 @@
 
 #define VIEWER_H
 
+#include "Transform3.h"
 #include <QLabel>
 
 class Viewer: public QLabel {
@@ -18,9 +19,7 @@ public:
 protected:
   void rebuild();
 private:
-  float x0, y0, z0;
-  float dxx, dxy, dxz;
-  float dyx, dyy, dyz;
+  Transform3 t;
   int hidpi_;
   Voxmap *voxmap;
   uint8_t lut[256];

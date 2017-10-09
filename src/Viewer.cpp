@@ -10,7 +10,6 @@
 Viewer::Viewer(QWidget *parent): QLabel(parent) {
   voxmap = 0;
   hidpi_ = 3;
-  x0 = y0 = z0 = 0;
   setScaledContents(false);
   setMouseTracking(true);
   dragbutton = Qt::NoButton;
@@ -28,16 +27,10 @@ Viewer::Viewer(QWidget *parent): QLabel(parent) {
 
 void Viewer::setVoxmap(Voxmap *vm) {
   voxmap = vm;
+  t = Transform3();
   if (voxmap) {
-    x0 = vm->width()/2;
-    y0 = vm->height()/2;
-    z0 = vm->depth()/2;
-    dxx = 1;
-    dxy = 0;
-    dxz = 0;
-    dyx = 0;
-    dyy = 1;
-    dyz = 0;
+    t.shift(vm->width()/2, vm->height()/2, vm->depth()/2);
+    t.shift(-width()/2./hidpi_, -height()/2./hidpi_, 0);
   }
   rebuild();
 }
@@ -45,8 +38,7 @@ void Viewer::setVoxmap(Voxmap *vm) {
 void Viewer::mouseMoveEvent(QMouseEvent *e) {
   if (dragbutton==Qt::LeftButton) {
     QPoint delta = e->pos() - dragbase;
-    x0 -= delta.x() * 1.0 / hidpi_;
-    y0 -= delta.y() * 1.0/ hidpi_;
+    t.shift(-delta.x()*1./hidpi_, -delta.y()*1./hidpi_, 0);
     dragbase = e->pos();
     rebuild();
   }
@@ -65,7 +57,7 @@ void Viewer::mouseReleaseEvent(QMouseEvent *) {
 void Viewer::wheelEvent(QWheelEvent *e) {
   QPoint p = e->angleDelta();
   qDebug() << "wheel" << p;
-  z0 += p.y()/40.0;
+  t.shift(0, 0, p.y()/40.0);
   rebuild();
 }
 
@@ -82,9 +74,7 @@ void Viewer::rebuild() {
     for (int y=0; y<h; y++) {
       uint8_t *bits = img.scanLine(y);
       for (int x=0; x<w; x++)
-	*bits++ = lut[voxmap->pixelAt(x0 + dxx*x + dyx*y,
-				      y0 + dxy*x + dyy*y,
-				      z0 + dxz*x + dyz*y)];
+	*bits++ = lut[voxmap->nearestPixel(t.apply(Point3(x, y, 0)))];
     }
     setPixmap(QPixmap::fromImage(img.scaled(hidpi_*w, hidpi_*h)));
   } else {
