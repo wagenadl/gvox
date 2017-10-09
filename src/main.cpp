@@ -9,7 +9,15 @@ int main(int argc, char **argv) {
   QApplication app(argc, argv);
 
   Voxmap voxmap;
-  voxmap.loadFromJson("/home/wagenaar/Desktop/uCT-170428/voxmap.json");
+  if (argc>=2) {
+    QString src = argv[1];
+    if (src.endsWith("json")) 
+      voxmap.loadFromJson(src);
+    else
+      voxmap.importDir(src, src);
+  } else {
+    voxmap.loadFromJson("/home/wagenaar/Desktop/uCT-170428/voxmap.json");
+  }
   voxmap.setNullValue(200);
 		   
   Viewer viewer;

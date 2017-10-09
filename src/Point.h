@@ -4,6 +4,8 @@
 
 #define POINT_H
 
+#include <QDebug>
+
 struct Point2 {
   float x;
   float y;
@@ -15,6 +17,9 @@ struct Point3 {
   float y;
   float z;
   Point3(float x=0, float y=0, float z=0): x(x), y(y), z(z) {}
+  void report() {
+    qDebug() << x << y << z;
+  }
 };
 
 #endif

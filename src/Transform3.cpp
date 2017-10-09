@@ -45,6 +45,14 @@ Transform3 Transform3::zrotator(float dxy) {
   return mm;
 }
 
+Transform3 Transform3::scaler(float s) {
+  Transform3 mm;
+  mm.m[0][0] = s;
+  mm.m[1][1] = s;
+  mm.m[2][2] = s;
+  return mm;
+}
+
 Transform3 operator*(Transform3 const &l, Transform3 const &r) {
   Transform3 res;
   for (int n=0; n<4; n++) {
@@ -63,22 +71,34 @@ void Transform3::shift(float dx, float dy, float dz) {
 }
 
 void Transform3::rotate(float dxz, float dyz, float x0, float y0) {
-  *this = *this * shifter(-x0, -y0, 0);
+  // I want to rotate such that the mapping of (x0,y0,0) is unchanged.
+  Point3 p0 = apply(Point3(x0, y0, 0));
   *this = *this * xrotator(dxz);
   *this = *this * yrotator(dyz);
-  *this = *this * shifter(x0, y0, 0);
+  Point3 p1 = apply(Point3(x0, y0, 0));
+  *this = shifter(p0.x-p1.x, p0.y-p1.y, p0.z-p1.z) * *this;
 }
 
 void Transform3::rotatez(float dxy, float x0, float y0) {
   // I want to rotate such that the mapping of (x0,y0,0) is unchanged.
-  qDebug() << "rotatez" << dxy << x0 << y0;
-  qDebug() << m[0][3] << m[1][3] << m[2][3];
-  *this = *this * shifter(-x0, -y0, 0);
-  Point3 dest = apply(Point3(0,0,0));
-  *this = shifter(-dest.x, -dest.y, -dest.z) * *this;
+  Point3 p0 = apply(Point3(x0, y0, 0));
   *this = *this * zrotator(dxy);
-  *this = shifter(dest.x, dest.y, dest.z) * *this;
-  *this = *this * shifter(x0, y0, 0);
-  qDebug() << m[0][3] << m[1][3] << m[2][3];
+  Point3 p1 = apply(Point3(x0, y0, 0));
+  *this = shifter(p0.x-p1.x, p0.y-p1.y, p0.z-p1.z) * *this;
 }
 
+void Transform3::scale(float s, float x0, float y0) {
+  // I want to rotate such that the mapping of (x0,y0,0) is unchanged.
+  Point3 p0 = apply(Point3(x0, y0, 0));
+  *this = *this * scaler(s);
+  Point3 p1 = apply(Point3(x0, y0, 0));
+  *this = shifter(p0.x-p1.x, p0.y-p1.y, p0.z-p1.z) * *this;
+}
+
+
+void Transform3::report() {
+  qDebug() << m[0][0] << m[0][1] << m[0][2] << m[0][3];
+  qDebug() << m[1][0] << m[1][1] << m[1][2] << m[1][3];
+  qDebug() << m[2][0] << m[2][1] << m[2][2] << m[2][3];
+  qDebug() << m[3][0] << m[3][1] << m[3][2] << m[3][3];
+}

@@ -24,6 +24,7 @@ private:
   Voxmap *voxmap;
   uint8_t lut[256];
   QPoint dragbase;
+  Transform3 t0;
   Qt::MouseButton dragbutton;
   Qt::KeyboardModifiers dragmods;
 };

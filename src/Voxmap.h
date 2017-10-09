@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <QJsonObject>
 #include "Point.h"
+#include "Transform3.h"
 
 class Voxmap {
 public:
@@ -34,6 +35,8 @@ public:
   uint8_t nearestPixel(Point3 const &p) const {
     return pixelAt(int(p.x+.5), int(p.y+.5), int(p.z+.5));
   }
+  void scanLine(Transform3 const &t, int y, int z, int nx, uint8_t *dest,
+                uint8_t const *lut);
   //  uint8_t trilinear(float x, float y, float z) const {
   //    int x0 = int(x);
   //    int y0 = int(y);

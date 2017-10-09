@@ -38,25 +38,28 @@ void Viewer::setVoxmap(Voxmap *vm) {
 void Viewer::mouseMoveEvent(QMouseEvent *e) {
   if (dragbutton==Qt::LeftButton && dragmods==Qt::NoModifier) {
     QPoint delta = e->pos() - dragbase;
+    t = t0;
     t.shift(-delta.x()*1./hidpi_, -delta.y()*1./hidpi_, 0);
-    dragbase = e->pos();
     rebuild();
-  } else if (dragbutton==Qt::LeftButton && dragmods==Qt::ControlModifier) {
+  } else if (dragbutton==Qt::LeftButton && dragmods & Qt::ControlModifier) {
     QPoint delta = e->pos() - dragbase;
+    t = t0;
     t.rotate(-delta.x()/200./hidpi_, -delta.y()/200./hidpi_,
-	     e->pos().x()*1./hidpi_, e->pos().y()*1./hidpi_);
-    dragbase = e->pos();
+	     dragbase.x()*1./hidpi_, dragbase.y()*1./hidpi_);
     rebuild();
-  } else if (dragbutton==Qt::LeftButton && dragmods==Qt::ShiftModifier) {
+  } else if (dragbutton==Qt::LeftButton && dragmods & Qt::ShiftModifier) {
     QPoint delta = e->pos() - dragbase;
+    t = t0;
     t.rotatez(-delta.x()/200./hidpi_,
-	      e->pos().x()*1./hidpi_, e->pos().y()*1./hidpi_);
-    dragbase = e->pos();
+	      dragbase.x()*1./hidpi_, dragbase.y()*1./hidpi_);
+    t.scale(exp(-delta.y()/200./hidpi_),
+            dragbase.x()*1./hidpi_, dragbase.y()*1./hidpi_);            
     rebuild();
   }
 }
 
 void Viewer::mousePressEvent(QMouseEvent *e) {
+  t0 = t;
   dragbase = e->pos();
   dragbutton = e->button();
   dragmods = e->modifiers();
@@ -69,7 +72,12 @@ void Viewer::mouseReleaseEvent(QMouseEvent *) {
 void Viewer::wheelEvent(QWheelEvent *e) {
   QPoint p = e->angleDelta();
   qDebug() << "wheel" << p;
-  t.shift(0, 0, p.y()/40.0);
+  if (e->modifiers() & Qt::ShiftModifier) {
+    t.scale(exp(-p.y()/200./hidpi_),
+            dragbase.x()*1./hidpi_, dragbase.y()*1./hidpi_);        
+  } else {
+    t.shift(0, 0, p.y()/40.0);
+  }
   rebuild();
 }
 
@@ -85,8 +93,7 @@ void Viewer::rebuild() {
     QImage img(w, h, QImage::Format_Grayscale8);
     for (int y=0; y<h; y++) {
       uint8_t *bits = img.scanLine(y);
-      for (int x=0; x<w; x++)
-	*bits++ = lut[voxmap->nearestPixel(t.apply(Point3(x, y, 0)))];
+      voxmap->scanLine(t, y, 0, w, bits, lut);
     }
     setPixmap(QPixmap::fromImage(img.scaled(hidpi_*w, hidpi_*h)));
   } else {

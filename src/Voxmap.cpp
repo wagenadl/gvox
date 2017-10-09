@@ -164,3 +164,34 @@ void Voxmap::loadFromJson(QString jsonfn) {
 void Voxmap::setNullValue(uint8_t v) {
   nullval = v;
 }
+
+void Voxmap::scanLine(Transform3 const &t, int y, int z, int nx,
+                      uint8_t *dest, uint8_t const *lut) {
+  Point3 p0 = t.apply(Point3(0, y, z));
+  Point3 p1 = t.apply(Point3(nx-1, y, z));
+  float x0 = p0.x + .5;
+  float y0 = p0.y + .5;
+  float z0 = p0.z + .5;
+  float x1 = p1.x + .5;
+  float y1 = p1.y + .5;
+  float z1 = p1.z + .5;
+  float dx = t.m[0][0];
+  float dy = t.m[1][0];
+  float dz = t.m[2][0];
+  if (x0>=0 && y0>=0 && z0>=0 && x0<X && y0<Y && z0<Z
+      && x1>=0 && y1>=0 && z1>=0 && x1<X && y1<Y && z1<Z) {
+    for (int ix=0; ix<nx; ix++) {
+      *dest++ = lut[data[int(x0)+int(y0)*ystride+int(z0)*zstride]];
+      x0 += dx;
+      y0 += dy;
+      z0 += dz;
+    }
+  } else {
+    for (int ix=0; ix<nx; ix++) {
+      *dest++ = lut[pixelAt(x0, y0, z0)];
+      x0 += dx;
+      y0 += dy;
+      z0 += dz;
+    }
+  }
+}
