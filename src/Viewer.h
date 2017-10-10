@@ -11,11 +11,12 @@ class Viewer: public QLabel {
 public:
   Viewer(QWidget *parent=0);
   void setVoxmap(class Voxmap *voxmap);
-  void mouseMoveEvent(QMouseEvent *);
-  void mousePressEvent(QMouseEvent *);
-  void mouseReleaseEvent(QMouseEvent *);
-  void wheelEvent(QWheelEvent *);
-  void resizeEvent(QResizeEvent *);
+  virtual void mouseMoveEvent(QMouseEvent *) override;
+  virtual void mousePressEvent(QMouseEvent *) override;
+  virtual void mouseReleaseEvent(QMouseEvent *) override;
+  virtual void wheelEvent(QWheelEvent *) override;
+  virtual void resizeEvent(QResizeEvent *) override;
+  virtual void paintEvent(QPaintEvent *) override;
 protected:
   void rebuild();
 private:

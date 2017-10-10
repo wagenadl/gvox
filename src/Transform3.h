@@ -23,7 +23,8 @@ public:
   void rotate(float dxz, float dyz, float x0, float y0);
   void rotatez(float dxy, float x0, float y0);
   void scale(float s, float x0, float y0);
-  void report();
+  void report() const;
+  Transform3 inverse() const;
 public:
   static Transform3 shifter(float dx, float dy, float dz);
   static Transform3 xrotator(float dxz);

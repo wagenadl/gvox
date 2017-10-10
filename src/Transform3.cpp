@@ -96,9 +96,52 @@ void Transform3::scale(float s, float x0, float y0) {
 }
 
 
-void Transform3::report() {
+void Transform3::report() const {
   qDebug() << m[0][0] << m[0][1] << m[0][2] << m[0][3];
   qDebug() << m[1][0] << m[1][1] << m[1][2] << m[1][3];
   qDebug() << m[2][0] << m[2][1] << m[2][2] << m[2][3];
   qDebug() << m[3][0] << m[3][1] << m[3][2] << m[3][3];
+}
+
+Transform3 Transform3::inverse() const {
+  // Based on https://en.wikipedia.org/wiki/Affine_transformation
+  // and https://www.thecrazyprogrammer.com/2017/02/c-c-program-find-inverse-matrix.html
+  
+  float A[3][3];
+  for (int i=0; i<3; i++)
+    for (int j=0; j<3; j++)
+      A[i][j] = m[i][j];
+  float b[3];
+  for (int i=0; i<3; i++)
+    b[i] = m[i][3];
+
+  float detA = 0;
+  for (int i=0; i<3; i++) 
+    detA += (A[0][i] * (A[1][(i+1)%3] * A[2][(i+2)%3]
+			- A[1][(i+2)%3] * A[2][(i+1)%3]));
+
+  float Ainv[3][3];
+  for (int i=0; i<3; i++)
+    for (int j=0; j<3; j++)
+      Ainv[i][j] = ((A[(j+1)%3][(i+1)%3] * A[(j+2)%3][(i+2)%3])
+		    - (A[(j+1)%3][(i+2)%3] * A[(j+2)%3][(i+1)%3]))
+	/ detA;
+
+  float binv[3];
+  for (int i=0; i<3; i++) {
+    float v = 0;
+    for (int j=0; j<3; j++)
+      v += Ainv[i][j] * b[j];
+    binv[i] = -v;
+  }
+  
+  Transform3 res;
+  for (int i=0; i<3; i++)
+    for (int j=0; j<3; j++)
+      res.m[i][j] = Ainv[i][j];
+
+  for (int i=0; i<3; i++)
+    res.m[i][3] = binv[i];
+
+  return res;
 }

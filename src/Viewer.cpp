@@ -8,6 +8,7 @@
 #include <math.h>
 #include <QTime>
 #include <thread>
+#include <QPainter>
 
 Viewer::Viewer(QWidget *parent): QLabel(parent) {
   voxmap = 0;
@@ -118,5 +119,48 @@ void Viewer::rebuild() {
     setPixmap(QPixmap::fromImage(img.scaled(hidpi_*w, hidpi_*h)));
   } else {
     setPixmap(QPixmap());
+  }
+}
+
+inline float sq(float x) {
+  return x*x;
+}
+
+inline float len(QPointF x) {
+  return sqrt(sq(x.x()) + sq(x.y()));
+}
+
+void Viewer::paintEvent(QPaintEvent *e) {
+  QLabel::paintEvent(e);
+  if (voxmap) {
+    Transform3 tinv = t.inverse();
+    int X = voxmap->width();
+    int Y = voxmap->height();
+    int Z = voxmap->depth();
+    Point3 xplus = tinv.apply(Point3(X, Y/2., Z/2.));
+    Point3 xmin = tinv.apply(Point3(0, Y/2., Z/2.));
+    Point3 yplus = tinv.apply(Point3(X/2., Y, Z/2.));
+    Point3 ymin = tinv.apply(Point3(X/2., 0, Z/2.));
+    Point3 zplus = tinv.apply(Point3(X/2., Y/2., Z));
+    Point3 zmin = tinv.apply(Point3(X/2., Y/2., 0));
+    Point3 dx3 = xplus - xmin;
+    Point3 dy3 = yplus - ymin;
+    Point3 dz3 = zplus - zmin;
+    dx3 /= dx3.length() + 1e-9;
+    dy3 /= dy3.length() + 1e-9;
+    dz3 /= dz3.length() + 1e-9;
+
+    QPainter p(this);
+    QPointF dx(dx3.x, dx3.y);
+    QPointF dy(dy3.x, dy3.y);
+    QPointF dz(dz3.x, dz3.y);
+    p.setPen(QPen("red"));
+    float S = 50*hidpi_;
+    QPointF XY0(S, S);
+    p.drawLine(XY0, XY0 + dx*S);
+    p.setPen(QPen("green"));
+    p.drawLine(XY0, XY0 + dy*S);
+    p.setPen(QPen("blue"));
+    p.drawLine(XY0, XY0 + dz*S);
   }
 }
