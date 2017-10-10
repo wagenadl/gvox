@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
   voxmap.setNullValue(200);
 		   
   Viewer viewer;
-  viewer.resize(512*3, 512*3);
+  viewer.resize(256*3, 256*3);
   viewer.setVoxmap(&voxmap);
   viewer.show();
   return app.exec();

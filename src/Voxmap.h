@@ -69,8 +69,10 @@ public:
     uint16_t px1 = (y1a*px10 + y0a*px11) >> 14;
     return (x1a*px0 + x0a*px1) >> 14;
   }
-  void scanLineTril(Transform3 const &t, int y, int z, int nx, uint8_t *dest,
-		    uint8_t const *lut);
+  void scanLineTril(Transform3 const &t, int y, int z, int nx,
+		    uint8_t *dest, uint8_t const *lut);
+  void scanLineTrilDepth(Transform3 const &t, int y, int nx, int nz,
+			 uint8_t *dest, uint8_t const *lut);
 private:
   static void traverse(QString dir, QStringList &out);
 private:

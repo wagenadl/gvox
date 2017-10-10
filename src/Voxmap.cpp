@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QDateTime>
 #include <QJsonDocument>
+#include <math.h>
 
 Voxmap::Voxmap() {
   X = Y = Z = 0;
@@ -199,14 +200,49 @@ void Voxmap::scanLine(Transform3 const &t, int y, int z, int nx,
 void Voxmap::scanLineTril(Transform3 const &t, int y, int z, int nx,
 			       uint8_t *dest, uint8_t const *lut) {
   Point3 p0 = t.apply(Point3(0, y, z));
-  float x0 = p0.x + .5;
-  float y0 = p0.y + .5;
-  float z0 = p0.z + .5;
+  float x0 = p0.x;
+  float y0 = p0.y;
+  float z0 = p0.z;
   float dx = t.m[0][0];
   float dy = t.m[1][0];
   float dz = t.m[2][0];
   for (int ix=0; ix<nx; ix++) {
     *dest++ = lut[trilinear(x0, y0, z0)];
+    x0 += dx;
+    y0 += dy;
+    z0 += dz;
+  }
+}
+
+
+void Voxmap::scanLineTrilDepth(Transform3 const &t, int y, int nx, int nz,
+			       uint8_t *dest, uint8_t const *lut) {
+  Point3 p0 = t.apply(Point3(0, y, nz-1));
+  float x0 = p0.x;
+  float y0 = p0.y;
+  float z0 = p0.z;
+  float dx = t.m[0][0];
+  float dy = t.m[1][0];
+  float dz = t.m[2][0];
+  float dxd = -t.m[0][2];
+  float dyd = -t.m[1][2];
+  float dzd = -t.m[2][2];
+  for (int ix=0; ix<nx; ix++) {
+    float alpha = 1;
+    float gray = 0;
+    float x1 = x0;
+    float y1 = y0;
+    float z1 = z0;
+    for (int iz=0; iz<nz; iz++) {
+      float here = trilinear(x1, y1, z1)/255.0;
+      float halpha = sqrt(here);
+      //alpha = halpha + alpha*(1-halpha);
+      gray = here*halpha + gray*(1-halpha);
+      x1 += dxd;
+      y1 += dyd;
+      z1 += dzd;
+    }
+    *dest++ = lut[uint8_t(255.99*gray/alpha)];
     x0 += dx;
     y0 += dy;
     z0 += dz;

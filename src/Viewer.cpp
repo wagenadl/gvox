@@ -96,6 +96,7 @@ void Viewer::rebuild() {
     for (int y=0; y<h; y++) {
       uint8_t *bits = img.scanLine(y);
       voxmap->scanLineTril(t, y, 0, w, bits, lut);
+      voxmap->scanLineTrilDepth(t, y, w, 10, bits, lut);
     }
     qDebug() << time.elapsed();
     setPixmap(QPixmap::fromImage(img.scaled(hidpi_*w, hidpi_*h)));
