@@ -217,7 +217,7 @@ void Voxmap::scanLineTril(Transform3 const &t, int y, int z, int nx,
 
 void Voxmap::scanLineTrilDepth(Transform3 const &t, int y, int nx, int nz,
 			       uint8_t *dest, uint8_t const *lut) {
-  Point3 p0 = t.apply(Point3(0, y, nz-1));
+  Point3 p0 = t.apply(Point3(0, y, (nz-1)/2.));
   float x0 = p0.x;
   float y0 = p0.y;
   float z0 = p0.z;
