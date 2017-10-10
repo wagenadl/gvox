@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <math.h>
 #include <QTime>
+#include <thread>
 
 Viewer::Viewer(QWidget *parent): QLabel(parent) {
   voxmap = 0;
@@ -93,10 +94,25 @@ void Viewer::rebuild() {
     int w = width() / hidpi_;
     int h = height() / hidpi_;
     QImage img(w, h, QImage::Format_Grayscale8);
-    for (int y=0; y<h; y++) {
-      uint8_t *bits = img.scanLine(y);
-      voxmap->scanLineTril(t, y, 0, w, bits, lut);
-      voxmap->scanLineTrilDepth(t, y, w, 10, bits, lut);
+    int nthreads = 4;
+    std::thread *thr[nthreads];
+    for (int i=0; i<nthreads; i++) {
+      int y0 = h*i/nthreads;
+      int y1 = h*(i+1)/nthreads;
+      auto foo = [&](int y0, int y1) {
+	for (int y=y0; y<y1; y++) {
+	  uint8_t *bits = img.scanLine(y);
+	  voxmap->scanLineTril(t, y, 0, w, bits, lut);
+	  voxmap->scanLineTrilDepth(t, y, w, 10, bits, lut);
+	}
+      };
+      thr[i] = new std::thread{foo, y0, y1};
+    }
+    for (int i=0; i<nthreads; i++) {
+      thr[i]->join();
+    }
+    for (int i=0; i<nthreads; i++) {
+      delete thr[i];
     }
     qDebug() << time.elapsed();
     setPixmap(QPixmap::fromImage(img.scaled(hidpi_*w, hidpi_*h)));
