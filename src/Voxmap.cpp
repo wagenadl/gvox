@@ -195,3 +195,20 @@ void Voxmap::scanLine(Transform3 const &t, int y, int z, int nx,
     }
   }
 }
+
+void Voxmap::scanLineTril(Transform3 const &t, int y, int z, int nx,
+			       uint8_t *dest, uint8_t const *lut) {
+  Point3 p0 = t.apply(Point3(0, y, z));
+  float x0 = p0.x + .5;
+  float y0 = p0.y + .5;
+  float z0 = p0.z + .5;
+  float dx = t.m[0][0];
+  float dy = t.m[1][0];
+  float dz = t.m[2][0];
+  for (int ix=0; ix<nx; ix++) {
+    *dest++ = lut[trilinear(x0, y0, z0)];
+    x0 += dx;
+    y0 += dy;
+    z0 += dz;
+  }
+}

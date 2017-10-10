@@ -37,25 +37,40 @@ public:
   }
   void scanLine(Transform3 const &t, int y, int z, int nx, uint8_t *dest,
                 uint8_t const *lut);
-  //  uint8_t trilinear(float x, float y, float z) const {
-  //    int x0 = int(x);
-  //    int y0 = int(y);
-  //    int z0 = int(z);
-  //    x -= x0;
-  //    y -= y0;
-  //    z -= z0;
-  //    float x1 = 1-x;
-  //    float y1 = 1-y;
-  //    float z1 = 1-z;
-  //    uint16_t px000 = pixelAt(x0,y0,z0);
-  //    uint16_t px001 = pixelAt(x0,y0,z1);
-  //    uint16_t px010 = pixelAt(x0,y1,z0);
-  //    uint16_t px011 = pixelAt(x0,y1,z1);
-  //    uint16_t px100 = pixelAt(x1,y0,z0);
-  //    uint16_t px101 = pixelAt(x1,y0,z1);
-  //    uint1_t px110 = pixelAt(x1,y1,z0);
-  //    uint8_t px111 = pixelAt(x1,y1,z1);
-  //    uint8
+  uint8_t trilinear(float x, float y, float z) const {
+    int x0 = int(x);
+    int y0 = int(y);
+    int z0 = int(z);
+    x -= x0;
+    y -= y0;
+    z -= z0;
+    float x1 = 1-x;
+    float y1 = 1-y;
+    float z1 = 1-z;
+    uint16_t px000 = pixelAt(x0,y0,z0);
+    uint16_t px001 = pixelAt(x0,y0,z0+1);
+    uint16_t px010 = pixelAt(x0,y0+1,z0);
+    uint16_t px011 = pixelAt(x0,y0+1,z0+1);
+    uint16_t px100 = pixelAt(x0+1,y0,z0);
+    uint16_t px101 = pixelAt(x0+1,y0,z0+1);
+    uint16_t px110 = pixelAt(x0+1,y0+1,z0);
+    uint16_t px111 = pixelAt(x0+1,y0+1,z0+1);
+    uint16_t x0a = 16384*x;
+    uint16_t y0a = 16384*y;
+    uint16_t z0a = 16384*z;
+    uint16_t x1a = 16384*x1;
+    uint16_t y1a = 16384*y1;
+    uint16_t z1a = 16384*z1;
+    uint16_t px00 = (z1a*px000 + z0a*px001) >> 14;
+    uint16_t px01 = (z1a*px010 + z0a*px011) >> 14;
+    uint16_t px10 = (z1a*px100 + z0a*px101) >> 14;
+    uint16_t px11 = (z1a*px110 + z0a*px111) >> 14;
+    uint16_t px0 = (y1a*px00 + y0a*px01) >> 14;
+    uint16_t px1 = (y1a*px10 + y0a*px11) >> 14;
+    return (x1a*px0 + x0a*px1) >> 14;
+  }
+  void scanLineTril(Transform3 const &t, int y, int z, int nx, uint8_t *dest,
+		    uint8_t const *lut);
 private:
   static void traverse(QString dir, QStringList &out);
 private:

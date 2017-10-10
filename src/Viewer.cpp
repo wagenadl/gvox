@@ -6,6 +6,7 @@
 #include <QWheelEvent>
 #include <QDebug>
 #include <math.h>
+#include <QTime>
 
 Viewer::Viewer(QWidget *parent): QLabel(parent) {
   voxmap = 0;
@@ -88,13 +89,15 @@ void Viewer::resizeEvent(QResizeEvent *) {
 void Viewer::rebuild() {
   if (voxmap) {
     qDebug() << "rebuild";
+    QTime time; time.start();
     int w = width() / hidpi_;
     int h = height() / hidpi_;
     QImage img(w, h, QImage::Format_Grayscale8);
     for (int y=0; y<h; y++) {
       uint8_t *bits = img.scanLine(y);
-      voxmap->scanLine(t, y, 0, w, bits, lut);
+      voxmap->scanLineTril(t, y, 0, w, bits, lut);
     }
+    qDebug() << time.elapsed();
     setPixmap(QPixmap::fromImage(img.scaled(hidpi_*w, hidpi_*h)));
   } else {
     setPixmap(QPixmap());
