@@ -2,6 +2,7 @@
 
 #include "Viewer.h"
 #include "Voxmap.h"
+#include "IDmap.h"
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QDebug>
@@ -9,22 +10,27 @@
 #include <QTime>
 #include <thread>
 #include <QPainter>
+#include "DistinctColors.h"
 
 Viewer::Viewer(QWidget *parent): QLabel(parent) {
   voxmap = 0;
+  idmap = 0;
+  idfactor = 1;
   hidpi_ = 3;
   setScaledContents(false);
   setMouseTracking(true);
+  setFocusPolicy(Qt::WheelFocus);
   dragbutton = Qt::NoButton;
 
   for (int x=0; x<256; x++) {
     double y = x/255.0;
-    y = pow((y-.1)/.8, .75);
+    y = pow((y-.1)/.75, .5);
     if (y<0)
       y = 0;
     else if (y>1)
       y = 1;
-    lut[x] = int(255.99*y);
+    uint8_t g(255.99*y);
+    lut[x] = 0xff000000 + g + 256*g + 65536*g;
   }
 }
 
@@ -38,34 +44,92 @@ void Viewer::setVoxmap(Voxmap *vm) {
   rebuild();
 }
 
+void Viewer::setIDmap(IDmap *im, int f) {
+  idmap = im;
+  idfactor = f;
+  paintid = (im) ? im->max()+1 : 1;
+  rebuildID();
+}
+
+void Viewer::keyPressEvent(QKeyEvent *e) {
+  qDebug() << "key" << e->key();
+  switch (e->key()) {
+  case Qt::Key_0:
+    paintid = 0;
+    qDebug() << "zero";
+    break;
+  case Qt::Key_Enter: case Qt::Key_Return:
+    qDebug() << "enter";
+      paintid = (idmap) ? idmap->max()+1 : 1;
+    break;
+  }
+}
+
 void Viewer::mouseMoveEvent(QMouseEvent *e) {
-  if (dragbutton==Qt::LeftButton && dragmods==Qt::NoModifier) {
+  if (dragbutton==Qt::LeftButton && dragmods & Qt::ShiftModifier) {
+    // shift-drag: move
     QPoint delta = e->pos() - dragbase;
     t = t0;
     t.shift(-delta.x()*1./hidpi_, -delta.y()*1./hidpi_, 0);
     rebuild();
   } else if (dragbutton==Qt::LeftButton && dragmods & Qt::ControlModifier) {
+    // control-drag: rotate 3D
     QPoint delta = e->pos() - dragbase;
     t = t0;
     t.rotate(-delta.x()/200./hidpi_, -delta.y()/200./hidpi_,
 	     dragbase.x()*1./hidpi_, dragbase.y()*1./hidpi_);
     rebuild();
-  } else if (dragbutton==Qt::LeftButton && dragmods & Qt::ShiftModifier) {
-    QPoint delta = e->pos() - dragbase;
-    t = t0;
-    t.rotatez(-delta.x()/200./hidpi_,
-	      dragbase.x()*1./hidpi_, dragbase.y()*1./hidpi_);
-    t.scale(exp(-delta.y()/200./hidpi_),
-            dragbase.x()*1./hidpi_, dragbase.y()*1./hidpi_);            
-    rebuild();
+  } else if (dragbutton==Qt::LeftButton && dragmods==Qt::NoModifier) {
+    // paint!
+    if (idmap) {
+      Point3 p(tid.apply(Point3(e->pos().x()*1./hidpi_,
+				e->pos().y()*1./hidpi_, 0)));
+      qDebug() << "set" << p.x << p.y << p.z;
+      idmap->paint(p.x, p.y, p.z, paintid);
+      rebuildID();
+    }
   }
 }
+
+void Viewer::mouseDoubleClickEvent(QMouseEvent *e) {
+  if (!idmap)
+    return;
+  if (e->button()==Qt::LeftButton && e->modifiers()==Qt::NoModifier) {
+    // paint cell body
+    const double Rf = 9./idfactor;
+    const int R = ceil(Rf);
+    Point3 p(tid.apply(Point3(e->pos().x()*1./hidpi_,
+			      e->pos().y()*1./hidpi_, 0)));
+    qDebug() << "set" << p.x << p.y << p.z;
+    for (int dx=-R; dx<=R; dx++) 
+      for (int dy=-R; dy<=R; dy++) 
+	for (int dz=-R; dz<=R; dz++) 
+	  if (dx*dx + dy*dy + dz*dz < Rf*Rf)
+	    idmap->paint(p.x+dx, p.y+dy, p.z+dz, paintid);
+    rebuildID();
+  } else if (e->button()==Qt::RightButton) {
+      Point3 p(tid.apply(Point3(e->pos().x()*1./hidpi_,
+				e->pos().y()*1./hidpi_, 0)));
+      paintid = idmap->getf(p.x, p.y, p.z);
+      qDebug() << "get" << p.x << p.y << p.z << "->" << paintid;
+  }
+}
+    
 
 void Viewer::mousePressEvent(QMouseEvent *e) {
   t0 = t;
   dragbase = e->pos();
   dragbutton = e->button();
   dragmods = e->modifiers();
+  if (dragbutton==Qt::RightButton) {
+    Point3 p(tid.apply(Point3(e->pos().x()*1./hidpi_,
+			      e->pos().y()*1./hidpi_, 0)));
+      paintid = idmap->getf(p.x, p.y, p.z);
+      qDebug() << "get" << p.x << p.y << p.z << "->" << paintid;
+  } else if (dragmods==Qt::NoModifier) {
+    mouseMoveEvent(e); // treat as paint
+  }
+  
 }
 
 void Viewer::mouseReleaseEvent(QMouseEvent *) {
@@ -73,14 +137,17 @@ void Viewer::mouseReleaseEvent(QMouseEvent *) {
 }
 
 void Viewer::wheelEvent(QWheelEvent *e) {
-  QPoint p = e->angleDelta();
-  qDebug() << "wheel" << p;
-  if (e->modifiers() & Qt::ShiftModifier) {
-    t.scale(exp(-p.y()/200./hidpi_),
-            dragbase.x()*1./hidpi_, dragbase.y()*1./hidpi_);        
-  } else {
-    t.shift(0, 0, p.y()/40.0);
-  }
+  QPoint delta = e->angleDelta();
+  if (e->modifiers() & Qt::ControlModifier) {
+    QPointF pos = e->pos(); pos /= hidpi_;
+    // wheel + control: rotate in plane or scale
+    t.rotatez(-delta.x()/200./hidpi_, pos.x(), pos.y());
+    t.scale(exp(-delta.y()/200./hidpi_), pos.x(), pos.y());
+    rebuild();
+  } else if (e->modifiers() & Qt::ShiftModifier) {
+    // wheel + shift: move in Z
+    t.shift(0, 0, delta.y()/40.0);
+  } 
   rebuild();
 }
 
@@ -89,12 +156,13 @@ void Viewer::resizeEvent(QResizeEvent *) {
 }
 
 void Viewer::rebuild() {
+  tid = Transform3::scaler(1./idfactor) * t;
   if (voxmap) {
     qDebug() << "rebuild";
     QTime time; time.start();
     int w = width() / hidpi_;
     int h = height() / hidpi_;
-    QImage img(w, h, QImage::Format_Grayscale8);
+    QImage img(w, h, QImage::Format_RGB32);
     int nthreads = 4;
     std::thread *thr[nthreads];
     for (int i=0; i<nthreads; i++) {
@@ -102,9 +170,63 @@ void Viewer::rebuild() {
       int y1 = h*(i+1)/nthreads;
       auto foo = [&](int y0, int y1) {
 	for (int y=y0; y<y1; y++) {
-	  uint8_t *bits = img.scanLine(y);
-	  voxmap->scanLineTril(t, y, 0, w, bits, lut);
+	  uint32_t *bits = (uint32_t*)(img.scanLine(y));
 	  voxmap->scanLineTrilDepth(t, y, w, 10, bits, lut);
+	}
+      };
+      thr[i] = new std::thread{foo, y0, y1};
+    }
+    for (int i=0; i<nthreads; i++) {
+      thr[i]->join();
+    }
+    for (int i=0; i<nthreads; i++) {
+      delete thr[i];
+    }
+    qDebug() << time.elapsed();
+    im0 = img;
+    rebuildID();
+  } else {
+    setPixmap(QPixmap());
+  }
+}
+
+void Viewer::rebuildID() {
+  static DistinctColors dc;
+  int w = width() / hidpi_;
+  int h = height() / hidpi_;
+  if (idmap) {
+    qDebug() << "rebuildID";
+    QTime time; time.start();
+    QImage img(im0);
+    img.setPixel(QPoint(0,0), 0xffffffff); // force detach
+    qDebug() << w << h << img.size();
+    int nthreads = 4;
+    std::thread *thr[nthreads];
+    for (int i=0; i<nthreads; i++) {
+      int y0 = h*i/nthreads;
+      int y1 = h*(i+1)/nthreads;
+      auto foo = [&](int y0, int y1) {
+	uint16_t buf[w];
+	for (int y=y0; y<y1; y++) {
+	  uint32_t *bits = (uint32_t*)(img.scanLine(y));
+	  idmap->scanLine(tid, y, w, buf);
+	  for (int x=0; x<w; x++) {
+	    if (buf[x]) {
+	      uint8_t *dst = (uint8_t*)(bits);
+	      uint32_t cc = dc.color(buf[x]);
+	      uint8_t const *src = (uint8_t const *)(&cc);
+	      int r = dst[0];
+	      int g = dst[1];
+	      int b = dst[2];
+	      r *= src[0];
+	      g *= src[1];
+	      b *= src[2];
+	      dst[0] = r/256;
+	      dst[1] = g/256;
+	      dst[2] = b/256;
+	    }
+	    bits+=1;
+	  }
 	}
       };
       thr[i] = new std::thread{foo, y0, y1};
@@ -118,9 +240,9 @@ void Viewer::rebuild() {
     qDebug() << time.elapsed();
     setPixmap(QPixmap::fromImage(img.scaled(hidpi_*w, hidpi_*h)));
   } else {
-    setPixmap(QPixmap());
+    setPixmap(QPixmap::fromImage(im0.scaled(hidpi_*w, hidpi_*h)));
   }
-}
+}  
 
 inline float sq(float x) {
   return x*x;

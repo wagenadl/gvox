@@ -20,6 +20,7 @@ public:
   void saveJson(QString jsonfn); // does not save raw data
   void clear();
 public:
+  QString basename() const;
   int width() const { return X; }
   int height() const { return Y; }
   int depth() const { return Z; }
@@ -73,6 +74,8 @@ public:
 		    uint8_t *dest, uint8_t const *lut);
   void scanLineTrilDepth(Transform3 const &t, int y, int nx, int nz,
 			 uint8_t *dest, uint8_t const *lut);
+  void scanLineTrilDepth(Transform3 const &t, int y, int nx, int nz,
+			 uint32_t *dest, uint32_t const *lut); // RGB version
 private:
   static void traverse(QString dir, QStringList &out);
 private:

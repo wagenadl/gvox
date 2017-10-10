@@ -35,5 +35,6 @@ public:
   float m[4][4];
 };
 
+Transform3 operator*(Transform3 const &l, Transform3 const &r);
 
 #endif
