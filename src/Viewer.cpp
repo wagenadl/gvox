@@ -150,7 +150,7 @@ void Viewer::wheelEvent(QWheelEvent *e) {
   if (e->modifiers() & Qt::ControlModifier) {
     QPointF pos = e->pos(); pos /= hidpi_;
     // wheel + control: rotate in plane or scale
-    t.rotatez(-delta.x()/200./hidpi_, pos.x(), pos.y());
+    //// t.rotatez(-delta.x()/200./hidpi_, pos.x(), pos.y());
     t.scale(exp(-delta.y()/200./hidpi_), pos.x(), pos.y());
     rebuild();
   } else if (e->modifiers() & Qt::ShiftModifier) {
