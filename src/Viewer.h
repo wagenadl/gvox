@@ -29,7 +29,8 @@ private:
   Voxmap *voxmap;
   IDmap *idmap;
   int idfactor;
-  uint32_t lut[256];
+  static constexpr int HALFNZ = 5;
+  uint32_t lut[(HALFNZ*2+1)*256];
   QPoint dragbase;
   Transform3 t0;
   Transform3 tid;

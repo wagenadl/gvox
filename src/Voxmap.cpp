@@ -216,6 +216,11 @@ void Voxmap::scanLineTril(Transform3 const &t, int y, int z, int nx,
 }
 
 
+/* Alpha blending based on https://en.wikipedia.org/wiki/Alpha_compositing#Alpha_blending:
+    outA  =  frontA  +  backA  * (1-frontA)
+   outRGB = frontRGB + backRGB * (1-frontA)
+ */
+
 void Voxmap::scanLineTrilDepth(Transform3 const &t, int y, int nx, int nz,
 			       uint8_t *dest, uint8_t const *lut) {
   Point3 p0 = t.apply(Point3(0, y, (nz-1)/2.));
@@ -262,20 +267,43 @@ void Voxmap::scanLineTrilDepth(Transform3 const &t, int y, int nx, int nz,
   float dyd = -t.m[1][2];
   float dzd = -t.m[2][2];
   for (int ix=0; ix<nx; ix++) {
-    float alpha = 1;
-    float gray = 0;
+    float a = 0;
+    float r=0, g=0, b=0;
     float x1 = x0;
     float y1 = y0;
     float z1 = z0;
-    for (int iz=0; iz<nz; iz++) {
-      float here = trilinear(x1, y1, z1)/255.0;
-      float halpha = sqrt(here);
-      gray = here*halpha + gray*(1-halpha);
+    for (int iz=0; iz<=nz/2; iz++) { // first half
+      uint32_t herergb = lut[256*iz+trilinear(x1, y1, z1)];
+      float rh = ((herergb>>16) & 255)/255.0;
+      float gh = ((herergb>>8) & 255)/255.0;
+      float bh = ((herergb) & 255)/255.0;
+      float ah = bh/4; // OK?
+      r = rh*ah + r*(1-ah);
+      g = gh*ah + g*(1-ah);
+      b = bh*ah + b*(1-ah);
+      a = ah + a*(1-ah);
       x1 += dxd;
       y1 += dyd;
       z1 += dzd;
     }
-    *dest++ = lut[uint8_t(255.99*gray/alpha)];
+    for (int iz=nz/2+1; iz<nz; iz++) { // second half
+      uint32_t herergb = lut[256*iz+trilinear(x1, y1, z1)];
+      float rh = ((herergb>>16) & 255)/255.0;
+      float gh = ((herergb>>8) & 255)/255.0;
+      float bh = ((herergb) & 255)/255.0;
+      float ah = bh/4; // OK?
+      r = r + rh*ah*(1-a);
+      g = g + gh*ah*(1-a);
+      b = b + bh*ah*(1-a);
+      a = a + ah*(1-a);
+      x1 += dxd;
+      y1 += dyd;
+      z1 += dzd;
+    }
+    uint8_t r1 = r*255.99;
+    uint8_t g1 = g*255.99;
+    uint8_t b1 = b*255.99;
+    *dest++ = 0xff000000 + b1 + 256*g1 + 65536*r1;
     x0 += dx;
     y0 += dy;
     z0 += dz;

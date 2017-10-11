@@ -29,8 +29,15 @@ Viewer::Viewer(QWidget *parent): QLabel(parent) {
       y = 0;
     else if (y>1)
       y = 1;
-    uint8_t g(255.99*y);
-    lut[x] = 0xff000000 + g + 256*g + 65536*g;
+    for (int iz=0; iz<=HALFNZ*2; iz++) {
+      double z = (iz - HALFNZ) * 1.0 / HALFNZ;
+      double z1 = (z>0) ? z : 0;
+      double z2 = (z<0) ? z : 0;
+      uint8_t g(255.99*y*(1-z1*.5));
+      uint8_t r(255.99*y*(1+z2*.5));
+      uint8_t b(255.99*y);
+      lut[iz*256+x] = 0xff000000 + b + 256*g + 65536*r;
+    }
   }
 }
 
@@ -52,7 +59,6 @@ void Viewer::setIDmap(IDmap *im, int f) {
 }
 
 void Viewer::keyPressEvent(QKeyEvent *e) {
-  qDebug() << "key" << e->key();
   switch (e->key()) {
   case Qt::Key_0:
     paintid = 0;
@@ -84,7 +90,6 @@ void Viewer::mouseMoveEvent(QMouseEvent *e) {
     if (idmap) {
       Point3 p(tid.apply(Point3(e->pos().x()*1./hidpi_,
 				e->pos().y()*1./hidpi_, 0)));
-      qDebug() << "set" << p.x << p.y << p.z;
       idmap->paint(p.x, p.y, p.z, paintid);
       rebuildID();
     }
@@ -100,7 +105,6 @@ void Viewer::mouseDoubleClickEvent(QMouseEvent *e) {
     const int R = ceil(Rf);
     Point3 p(tid.apply(Point3(e->pos().x()*1./hidpi_,
 			      e->pos().y()*1./hidpi_, 0)));
-    qDebug() << "set" << p.x << p.y << p.z;
     for (int dx=-R; dx<=R; dx++) 
       for (int dy=-R; dy<=R; dy++) 
 	for (int dz=-R; dz<=R; dz++) 
@@ -111,7 +115,6 @@ void Viewer::mouseDoubleClickEvent(QMouseEvent *e) {
       Point3 p(tid.apply(Point3(e->pos().x()*1./hidpi_,
 				e->pos().y()*1./hidpi_, 0)));
       paintid = idmap->getf(p.x, p.y, p.z);
-      qDebug() << "get" << p.x << p.y << p.z << "->" << paintid;
   }
 }
     
@@ -125,7 +128,6 @@ void Viewer::mousePressEvent(QMouseEvent *e) {
     Point3 p(tid.apply(Point3(e->pos().x()*1./hidpi_,
 			      e->pos().y()*1./hidpi_, 0)));
       paintid = idmap->getf(p.x, p.y, p.z);
-      qDebug() << "get" << p.x << p.y << p.z << "->" << paintid;
   } else if (dragmods==Qt::NoModifier) {
     mouseMoveEvent(e); // treat as paint
   }
@@ -158,8 +160,6 @@ void Viewer::resizeEvent(QResizeEvent *) {
 void Viewer::rebuild() {
   tid = Transform3::scaler(1./idfactor) * t;
   if (voxmap) {
-    qDebug() << "rebuild";
-    QTime time; time.start();
     int w = width() / hidpi_;
     int h = height() / hidpi_;
     QImage img(w, h, QImage::Format_RGB32);
@@ -182,7 +182,6 @@ void Viewer::rebuild() {
     for (int i=0; i<nthreads; i++) {
       delete thr[i];
     }
-    qDebug() << time.elapsed();
     im0 = img;
     rebuildID();
   } else {
@@ -195,11 +194,8 @@ void Viewer::rebuildID() {
   int w = width() / hidpi_;
   int h = height() / hidpi_;
   if (idmap) {
-    qDebug() << "rebuildID";
-    QTime time; time.start();
     QImage img(im0);
     img.setPixel(QPoint(0,0), 0xffffffff); // force detach
-    qDebug() << w << h << img.size();
     int nthreads = 4;
     std::thread *thr[nthreads];
     for (int i=0; i<nthreads; i++) {
@@ -237,7 +233,6 @@ void Viewer::rebuildID() {
     for (int i=0; i<nthreads; i++) {
       delete thr[i];
     }
-    qDebug() << time.elapsed();
     setPixmap(QPixmap::fromImage(img.scaled(hidpi_*w, hidpi_*h)));
   } else {
     setPixmap(QPixmap::fromImage(im0.scaled(hidpi_*w, hidpi_*h)));

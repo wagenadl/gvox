@@ -75,7 +75,7 @@ public:
   void scanLineTrilDepth(Transform3 const &t, int y, int nx, int nz,
 			 uint8_t *dest, uint8_t const *lut);
   void scanLineTrilDepth(Transform3 const &t, int y, int nx, int nz,
-			 uint32_t *dest, uint32_t const *lut); // RGB version
+			 uint32_t *dest, uint32_t const *lut); // RGB version, deep lut
 private:
   static void traverse(QString dir, QStringList &out);
 private:
