@@ -11,10 +11,13 @@
 #include <thread>
 #include <QPainter>
 #include "DistinctColors.h"
+#include "PViewer.h"
 
 Viewer::Viewer(QWidget *parent): QLabel(parent) {
+  pviewer = 0;
   voxmap = 0;
   idmap = 0;
+  showids = true;
   idfactor = 1;
   hidpi_ = 3;
   setScaledContents(false);
@@ -33,12 +36,19 @@ Viewer::Viewer(QWidget *parent): QLabel(parent) {
       double z = (iz - HALFNZ) * 1.0 / HALFNZ;
       double z1 = (z>0) ? z : 0;
       double z2 = (z<0) ? z : 0;
-      uint8_t g(255.99*y*(1-z1*.5));
-      uint8_t r(255.99*y*(1+z2*.5));
-      uint8_t b(255.99*y);
+      uint8_t g(255.99*y*(1-z1*.75));
+      uint8_t r(255.99*y*(1+z2));
+      uint8_t b(255.99*y*(1+.25*z2));
       lut[iz*256+x] = 0xff000000 + b + 256*g + 65536*r;
     }
   }
+  message = new QLabel(this);
+  message->setPalette(QPalette(QColor("white"), QColor("black")));
+  message->setText("Initializing");
+}
+
+Viewer::~Viewer() {
+  delete pviewer;
 }
 
 void Viewer::setVoxmap(Voxmap *vm) {
@@ -49,6 +59,8 @@ void Viewer::setVoxmap(Voxmap *vm) {
     t.shift(-width()/2./hidpi_, -height()/2./hidpi_, 0);
   }
   rebuild();
+  message->setText(QString("Voxmap: %1 x %2 x %3")
+		   .arg(vm->width()).arg(vm->height()).arg(vm->depth()));
 }
 
 void Viewer::setIDmap(IDmap *im, int f) {
@@ -62,13 +74,44 @@ void Viewer::keyPressEvent(QKeyEvent *e) {
   switch (e->key()) {
   case Qt::Key_Delete: case Qt::Key_Backspace:
     paintid = 0;
-    qDebug() << "deleting";
+    message->setText(QString("Erasing"));
+    qDebug() << "erasing";
+    break;
+  case Qt::Key_Slash:
+    showids = !showids;
+    rebuildID();
     break;
   case Qt::Key_Enter: case Qt::Key_Return:
-    qDebug() << "new";
-      paintid = (idmap) ? idmap->max()+1 : 1;
+    paintid = (idmap) ? idmap->max()+1 : 1;
+    message->setText(QString("New ID #%1").arg(paintid));
+    break;
+  case Qt::Key_T:
+    ensurePViewer();
+    pviewer->showTracings(lastkey);
+    break;
+  case Qt::Key_E:
+    if (idmap && voxmap) {
+      QString ofn = voxmap->basename() + ".txt";
+      if (idmap->textExport(ofn))
+	message->setText("Exported to " + ofn);
+    }
+    break;
+  case Qt::Key_D:
+    if (idmap) {
+      int id = lastkey.toInt();
+      if (id) {
+	idmap->drop(id);
+	message->setText(QString("Deleted ID #%1").arg(id));
+	rebuildID();
+      }
+    }
     break;
   }
+  
+  if (e->text()>="0" && e->text()<="9")
+    lastkey += e->text();
+  else
+    lastkey = "";
 }
 
 void Viewer::mouseMoveEvent(QMouseEvent *e) {
@@ -77,6 +120,9 @@ void Viewer::mouseMoveEvent(QMouseEvent *e) {
     QPoint delta = e->pos() - dragbase;
     t = t0;
     t.shift(-delta.x()*1./hidpi_, -delta.y()*1./hidpi_, 0);
+    Point3 p(t.apply(Point3(width()/2./hidpi_, height()/2./hidpi_, 0)));
+    message->setText(QString("Centered on (%1,%2,%3)")
+		     .arg(int(p.x)).arg(int(p.y)).arg(int(p.z)));
     rebuild();
   } else if (dragbutton==Qt::LeftButton && dragmods & Qt::ControlModifier) {
     // control-drag: rotate 3D
@@ -97,6 +143,7 @@ void Viewer::mouseMoveEvent(QMouseEvent *e) {
               idmap->paint(p.x+dx, p.y+dy, p.z+dz, paintid);
       } else {
         idmap->paint(p.x, p.y, p.z, paintid);
+	message->setText(QString("Painting ID #%1").arg(paintid));
       }
       rebuildID();
     }
@@ -117,11 +164,13 @@ void Viewer::mouseDoubleClickEvent(QMouseEvent *e) {
 	for (int dz=-R; dz<=R; dz++) 
 	  if (dx*dx + dy*dy + dz*dz < Rf*Rf)
 	    idmap->paint(p.x+dx, p.y+dy, p.z+dz, paintid);
+    message->setText(QString("Ball for ID #%1").arg(paintid));
     rebuildID();
   } else if (e->button()==Qt::RightButton) {
       Point3 p(tid.apply(Point3(e->pos().x()*1./hidpi_,
 				e->pos().y()*1./hidpi_, 0)));
       paintid = idmap->getf(p.x, p.y, p.z);
+      message->setText(QString("Adding to ID #%1").arg(paintid));
   }
 }
     
@@ -135,6 +184,7 @@ void Viewer::mousePressEvent(QMouseEvent *e) {
     Point3 p(tid.apply(Point3(e->pos().x()*1./hidpi_,
 			      e->pos().y()*1./hidpi_, 0)));
       paintid = idmap->getf(p.x, p.y, p.z);
+      message->setText(QString("Adding to ID #%1").arg(paintid));
   } else if (dragmods==Qt::NoModifier) {
     mouseMoveEvent(e); // treat as paint
   }
@@ -152,16 +202,24 @@ void Viewer::wheelEvent(QWheelEvent *e) {
     // wheel + control: rotate in plane or scale
     //// t.rotatez(-delta.x()/200./hidpi_, pos.x(), pos.y());
     t.scale(exp(-delta.y()/200./hidpi_), pos.x(), pos.y());
+    Point3 p1(t.apply(Point3(0,0,0)));
+    Point3 p2(t.apply(Point3(100,0,0)));
+    message->setText(QString("Scale: %1%").arg(int(1e4/((p1-p2).length()))));
     rebuild();
   } else if (e->modifiers() & Qt::ShiftModifier) {
     // wheel + shift: move in Z
     t.shift(0, 0, delta.y()/40.0);
+    Point3 p(t.apply(Point3(width()/2./hidpi_, height()/2./hidpi_, 0)));
+    message->setText(QString("Centered on (%1,%2,%3)")
+		     .arg(int(p.x)).arg(int(p.y)).arg(int(p.z)));
   } 
   rebuild();
 }
 
 void Viewer::resizeEvent(QResizeEvent *) {
   rebuild();
+  message->move(5, height() - 40);
+  message->resize(width()-10, 35);
 }
 
 void Viewer::rebuild() {
@@ -200,7 +258,7 @@ void Viewer::rebuildID() {
   static DistinctColors dc;
   int w = width() / hidpi_;
   int h = height() / hidpi_;
-  if (idmap) {
+  if (idmap && showids) {
     QImage img(im0);
     img.setPixel(QPoint(0,0), 0xffffffff); // force detach
     int nthreads = 4;
@@ -278,13 +336,34 @@ void Viewer::paintEvent(QPaintEvent *e) {
     QPointF dx(dx3.x, dx3.y);
     QPointF dy(dy3.x, dy3.y);
     QPointF dz(dz3.x, dz3.y);
-    p.setPen(QPen("red"));
-    float S = 50*hidpi_;
-    QPointF XY0(S, S);
-    p.drawLine(XY0, XY0 + dx*S);
-    p.setPen(QPen("green"));
-    p.drawLine(XY0, XY0 + dy*S);
-    p.setPen(QPen("blue"));
-    p.drawLine(XY0, XY0 + dz*S);
+    float S = 30*hidpi_;
+    QPointF XY0(S*2, S*2);
+
+    p.setPen(QPen(QColor(255,0,0), 2));
+    p.drawLine(XY0 - .8*dx*S, XY0 + .8*dx*S);
+    p.drawText(QRectF(XY0+dx*S, QSize(100,100)).translated(-50, -50),
+	       Qt::AlignCenter, "R");
+    p.drawText(QRectF(XY0-dx*S, QSize(100,100)).translated(-50, -50),
+	       Qt::AlignCenter, "L");
+
+    p.setPen(QPen(QColor(0, 255, 0), 2));
+    p.drawLine(XY0 - .8*dy*S, XY0 + .8*dy*S);
+    p.drawText(QRectF(XY0+dy*S, QSize(100,100)).translated(-50, -50),
+	       Qt::AlignCenter, "V");
+    p.drawText(QRectF(XY0-dy*S, QSize(100,100)).translated(-50, -50),
+	       Qt::AlignCenter, "D");
+
+    p.setPen(QPen(QColor(50, 100, 255), 2));
+    p.drawLine(XY0 -.8*dz*S, XY0 + .8*dz*S);
+    p.drawText(QRectF(XY0+dz*S, QSize(100,100)).translated(-50, -50),
+	       Qt::AlignCenter, "A");
+    p.drawText(QRectF(XY0-dz*S, QSize(100,100)).translated(-50, -50),
+	       Qt::AlignCenter, "P");
   }
+}
+
+void Viewer::ensurePViewer() {
+  if (!pviewer) 
+    pviewer = new PViewer(voxmap, idmap);
+  pviewer->show();
 }

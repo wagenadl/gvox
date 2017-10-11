@@ -22,6 +22,7 @@ public:
     set(x+.5, y+.5, z+.5, id);
     saveSoon();
   }
+  void drop(uint16_t id);
   uint16_t max() const;
   uint16_t get(int x, int y, int z) const {
     return (x<0 || x>=X || y<0 || y>=Y || z<0 || z>=Z)
@@ -30,8 +31,10 @@ public:
   uint16_t getf(float x, float y, float z) const {
     return get(x+.5, y+.5, z+.5);
   }
+  uint16_t const *bits() const { return data; } // use with care!
   void load(QString ifn);
   void save(QString ofn) const;
+  bool textExport(QString ofn) const; // true if OK
   void setAutoSaveName(QString ofn) {
     savefn = ofn;
   }

@@ -10,6 +10,7 @@
 class Viewer: public QLabel {
 public:
   Viewer(QWidget *parent=0);
+  ~Viewer();
   void setVoxmap(class Voxmap *voxmap);
   void setIDmap(class IDmap *voxmap, int factor);
   virtual void mouseMoveEvent(QMouseEvent *) override;
@@ -23,6 +24,7 @@ public:
 protected:
   void rebuild();
   void rebuildID();
+  void ensurePViewer();
 private:
   Transform3 t;
   int hidpi_;
@@ -38,6 +40,10 @@ private:
   Qt::KeyboardModifiers dragmods;
   QImage im0;
   uint16_t paintid;
+  bool showids;
+  class PViewer *pviewer;
+  QString lastkey;
+  QLabel *message;
 };
 
 #endif

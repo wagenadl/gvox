@@ -161,3 +161,28 @@ void IDmap::timerEvent(QTimerEvent *) {
   qDebug() << "saving" << savefn;
   save(savefn);
 }
+
+bool IDmap::textExport(QString ofn) const {
+  QFile fh(ofn);
+  if (fh.open(QFile::WriteOnly)) {
+    QTextStream ts(&fh);
+    for (int z=0; z<Z; z++) 
+      for (int y=0; y<Y; y++) 
+	for (int x=0; x<X; x++) 
+	  if (get(x,y,z))
+	    ts << x << " " << y << " " << z << " " << get(x,y,z) << "\n";
+    fh.close();
+    qDebug() << "Exported to " << ofn;
+    return true;
+  } else {
+    qDebug() << "Failed to export to " << ofn;
+    return false;
+  }
+}
+
+void IDmap::drop(uint16_t id) {
+  for (int x=0; x<X*Y*Z; x++)
+    if (data[x]==id)
+      data[x] = 0;
+  saveSoon();
+}

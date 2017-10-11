@@ -219,6 +219,7 @@ void Voxmap::scanLineTril(Transform3 const &t, int y, int z, int nx,
 /* Alpha blending based on https://en.wikipedia.org/wiki/Alpha_compositing#Alpha_blending:
     outA  =  frontA  +  backA  * (1-frontA)
    outRGB = frontRGB + backRGB * (1-frontA)
+ This assumes pre-multiplied alpha.
  */
 
 void Voxmap::scanLineTrilDepth(Transform3 const &t, int y, int nx, int nz,
@@ -277,7 +278,7 @@ void Voxmap::scanLineTrilDepth(Transform3 const &t, int y, int nx, int nz,
       float rh = ((herergb>>16) & 255)/255.0;
       float gh = ((herergb>>8) & 255)/255.0;
       float bh = ((herergb) & 255)/255.0;
-      float ah = bh/4; // OK?
+      float ah = bh*bh; // OK?
       r = rh*ah + r*(1-ah);
       g = gh*ah + g*(1-ah);
       b = bh*ah + b*(1-ah);
@@ -291,7 +292,7 @@ void Voxmap::scanLineTrilDepth(Transform3 const &t, int y, int nx, int nz,
       float rh = ((herergb>>16) & 255)/255.0;
       float gh = ((herergb>>8) & 255)/255.0;
       float bh = ((herergb) & 255)/255.0;
-      float ah = bh/4; // OK?
+      float ah = bh*bh; // OK?
       r = r + rh*ah*(1-a);
       g = g + gh*ah*(1-a);
       b = b + bh*ah*(1-a);
