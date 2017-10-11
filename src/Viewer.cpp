@@ -60,12 +60,12 @@ void Viewer::setIDmap(IDmap *im, int f) {
 
 void Viewer::keyPressEvent(QKeyEvent *e) {
   switch (e->key()) {
-  case Qt::Key_0:
+  case Qt::Key_Delete: case Qt::Key_Backspace:
     paintid = 0;
-    qDebug() << "zero";
+    qDebug() << "deleting";
     break;
   case Qt::Key_Enter: case Qt::Key_Return:
-    qDebug() << "enter";
+    qDebug() << "new";
       paintid = (idmap) ? idmap->max()+1 : 1;
     break;
   }
@@ -90,7 +90,14 @@ void Viewer::mouseMoveEvent(QMouseEvent *e) {
     if (idmap) {
       Point3 p(tid.apply(Point3(e->pos().x()*1./hidpi_,
 				e->pos().y()*1./hidpi_, 0)));
-      idmap->paint(p.x, p.y, p.z, paintid);
+      if (paintid==0) {
+        for (int dx=-1; dx<=1; dx++)
+          for (int dy=-1; dy<=1; dy++)
+            for (int dz=-1; dz<=1; dz++)
+              idmap->paint(p.x+dx, p.y+dy, p.z+dz, paintid);
+      } else {
+        idmap->paint(p.x, p.y, p.z, paintid);
+      }
       rebuildID();
     }
   }
