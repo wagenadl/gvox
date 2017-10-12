@@ -89,6 +89,13 @@ void Viewer::keyPressEvent(QKeyEvent *e) {
     ensurePViewer();
     pviewer->showTracings(lastkey);
     break;
+  case Qt::Key_O: {
+    ensurePViewer();
+    QCursor c0 = cursor();
+    setCursor(Qt::WaitCursor);
+    pviewer->showOverlay(lastkey);
+    setCursor(c0);
+  } break;
   case Qt::Key_E:
     if (idmap && voxmap) {
       QString ofn = voxmap->basename() + ".txt";

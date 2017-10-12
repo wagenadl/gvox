@@ -3,7 +3,7 @@
 
 TEMPLATE = app
 TARGET = gvox
-CONFIG += release
+CONFIG += debug_and_release
 QT += widgets
 CONFIG += c++11
 

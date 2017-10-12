@@ -19,6 +19,7 @@ public:
   void importDir(QString sourcedir, QString outbase);
   void saveJson(QString jsonfn); // does not save raw data
   void clear();
+  uint8_t const *bits() const { return data; } // use with care!
 public:
   QString basename() const;
   int width() const { return X; }

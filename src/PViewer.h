@@ -12,10 +12,13 @@ public:
   PViewer(class Voxmap *vm, class IDmap *im, QWidget *parent=0);
   ~PViewer();
   void showTracings(QString txt);
+  void showOverlay(QString txt);
 private:
   QVector<QLabel *> panels;
   class QGridLayout *grid;
   class Projection *proj;
+  class Voxmap *vm;
+  class IDmap *im;
 };
 
 #endif
