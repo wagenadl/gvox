@@ -186,3 +186,13 @@ void IDmap::drop(uint16_t id) {
       data[x] = 0;
   saveSoon();
 }
+
+QVector<iPoint3> IDmap::extract(uint16_t id) const {
+  QVector<iPoint3> pp;
+  for (int z=0; z<Z; z++)
+    for (int y=0; y<Y; y++)
+      for (int x=0; x<X; x++)
+	if (get(x,y,z)==id)
+	  pp.append(iPoint3(x,y,z));
+  return pp;
+}

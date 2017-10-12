@@ -30,6 +30,12 @@ struct Point3 {
     z /= f;
     return *this;
   }			       
+  Point3 &operator*=(float f) {
+    x *= f;
+    y *= f;
+    z *= f;
+    return *this;
+  }			       
 };
 
 inline Point3 operator-(Point3 const &a, Point3 const &b) {
@@ -40,6 +46,9 @@ inline Point3 operator-(Point3 const &a, Point3 const &b) {
   return p;
 }
 
-
+struct iPoint3 {
+  uint16_t x, y, z;
+  iPoint3(uint16_t x=0, uint16_t y=0, uint16_t z=0): x(x), y(y), z(z) {}
+};
 
 #endif

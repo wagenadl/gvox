@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include "Transform3.h"
 #include <QObject>
+#include <QVector>
 
 class IDmap: public QObject {
   static constexpr int MAXMVOX = 1000;
@@ -49,6 +50,7 @@ public:
   int depth() const { return Z; }
   bool isValid() const { return valid; }
   virtual void timerEvent(QTimerEvent *) override;
+  QVector<iPoint3> extract(uint16_t id) const; // get all coords of ID
 private:
   int X, Y, Z;
   int ystride, zstride;

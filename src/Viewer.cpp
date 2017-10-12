@@ -103,6 +103,9 @@ void Viewer::keyPressEvent(QKeyEvent *e) {
 	message->setText("Exported to " + ofn);
     }
     break;
+  case Qt::Key_G:
+    gotoID(lastkey.toInt());
+    break;
   case Qt::Key_D:
     if (idmap) {
       int id = lastkey.toInt();
@@ -373,4 +376,28 @@ void Viewer::ensurePViewer() {
   if (!pviewer) 
     pviewer = new PViewer(voxmap, idmap);
   pviewer->show();
+}
+
+void Viewer::gotoID(int id) {
+  if (!id)
+    return;
+  QVector<iPoint3> pp = idmap->extract(id);
+  if (pp.isEmpty())
+    return;
+  Point3 sumx;
+  int N = pp.length();
+  for (iPoint3 const &p: pp) {
+    sumx.x += p.x;
+    sumx.y += p.y;
+    sumx.z += p.z;
+  }
+  Point3 cm = sumx;
+  cm /= N;
+  Point3 current = t.apply(Point3(width()/2/hidpi_, height()/2/hidpi_, 0));
+  cm *= idfactor;
+  // not bothering with subpixel precision
+  Point3 delta = cm - current;
+  t = Transform3::shifter(delta.x, delta.y, delta.z) * t;
+  rebuild();
+  message->setText(QString("Centered on ID #%1").arg(id));
 }

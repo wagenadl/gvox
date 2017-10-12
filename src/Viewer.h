@@ -25,6 +25,7 @@ protected:
   void rebuild();
   void rebuildID();
   void ensurePViewer();
+  void gotoID(int id);
 private:
   Transform3 t;
   int hidpi_;

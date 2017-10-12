@@ -244,7 +244,10 @@ debug/DistinctColors.o: DistinctColors.cpp DistinctColors.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug/DistinctColors.o DistinctColors.cpp
 
 debug/PViewer.o: PViewer.cpp PViewer.h \
-		Projection.h
+		Projection.h \
+		Voxmap.h \
+		Point.h \
+		Transform3.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug/PViewer.o PViewer.cpp
 
 debug/Projection.o: Projection.cpp Projection.h \
