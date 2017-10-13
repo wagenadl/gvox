@@ -5,6 +5,9 @@
 #include "Projection.h"
 #include <QPainter>
 #include "Voxmap.h"
+#include <QKeyEvent>
+#include <QGuiApplication>
+#include <QClipboard>
 
 PViewer::PViewer(Voxmap *vm, IDmap *im, QWidget *parent):
   QWidget(parent), proj(new Projection(vm, im)), vm(vm), im(im) {
@@ -13,6 +16,7 @@ PViewer::PViewer(Voxmap *vm, IDmap *im, QWidget *parent):
   panels[0]->setScaledContents(true);
   grid->addWidget(panels[0], 0, 0);
   setLayout(grid);
+  setFocusPolicy(Qt::WheelFocus);
 }
 
 PViewer::~PViewer() {
@@ -87,7 +91,7 @@ void PViewer::showOverlay(QString txt) {
     ttl = "Left";
     lbl = "Post. Dorsal";
   } else if (txt=="5") {
-    img = proj->overlay(1, -1, -1, 1);
+    img = proj->overlay(1, -1, 1, -1);
     ttl = "Dorsal";
     lbl = "L. Ant.";
   } else if (txt=="6") {
@@ -108,4 +112,12 @@ void PViewer::showOverlay(QString txt) {
   panels[0]->setPixmap(pm);
   //  resize(pm.size()*2);
   setWindowTitle(ttl);
+}
+
+void PViewer::keyPressEvent(QKeyEvent *e) {
+  switch (e->key()) {
+  case Qt::Key_C:
+    QGuiApplication::clipboard()->setPixmap(*(panels[0]->pixmap()));
+    break;
+  }
 }

@@ -13,6 +13,7 @@ public:
   ~PViewer();
   void showTracings(QString txt);
   void showOverlay(QString txt);
+  virtual void keyPressEvent(QKeyEvent *) override;
 private:
   QVector<QLabel *> panels;
   class QGridLayout *grid;

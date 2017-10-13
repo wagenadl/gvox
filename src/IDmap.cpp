@@ -162,7 +162,7 @@ void IDmap::timerEvent(QTimerEvent *) {
   save(savefn);
 }
 
-bool IDmap::textExport(QString ofn) const {
+bool IDmap::textExport(QString ofn, int f) const {
   QFile fh(ofn);
   if (fh.open(QFile::WriteOnly)) {
     QTextStream ts(&fh);
@@ -170,7 +170,7 @@ bool IDmap::textExport(QString ofn) const {
       for (int y=0; y<Y; y++) 
 	for (int x=0; x<X; x++) 
 	  if (get(x,y,z))
-	    ts << x << " " << y << " " << z << " " << get(x,y,z) << "\n";
+	    ts << x*f << " " << y*f << " " << z*f << " " << get(x,y,z) << "\n";
     fh.close();
     qDebug() << "Exported to " << ofn;
     return true;

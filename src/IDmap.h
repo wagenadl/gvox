@@ -35,7 +35,7 @@ public:
   uint16_t const *bits() const { return data; } // use with care!
   void load(QString ifn);
   void save(QString ofn) const;
-  bool textExport(QString ofn) const; // true if OK
+  bool textExport(QString ofn, int factor=1) const; // true if OK
   void setAutoSaveName(QString ofn) {
     savefn = ofn;
   }

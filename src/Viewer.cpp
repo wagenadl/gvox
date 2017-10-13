@@ -12,6 +12,8 @@
 #include <QPainter>
 #include "DistinctColors.h"
 #include "PViewer.h"
+#include <QGuiApplication>
+#include <QClipboard>
 
 Viewer::Viewer(QWidget *parent): QLabel(parent) {
   pviewer = 0;
@@ -43,7 +45,9 @@ Viewer::Viewer(QWidget *parent): QLabel(parent) {
     }
   }
   message = new QLabel(this);
+  message2 = new QLabel(this);
   message->setPalette(QPalette(QColor("white"), QColor("black")));
+  message2->setPalette(QPalette(QColor("white"), QColor("black")));
   message->setText("Initializing");
 }
 
@@ -99,7 +103,7 @@ void Viewer::keyPressEvent(QKeyEvent *e) {
   case Qt::Key_E:
     if (idmap && voxmap) {
       QString ofn = voxmap->basename() + ".txt";
-      if (idmap->textExport(ofn))
+      if (idmap->textExport(ofn, idfactor))
 	message->setText("Exported to " + ofn);
     }
     break;
@@ -116,8 +120,10 @@ void Viewer::keyPressEvent(QKeyEvent *e) {
       }
     }
     break;
+  case Qt::Key_C:
+    QGuiApplication::clipboard()->setPixmap(*pixmap());
+    break;
   }
-  
   if (e->text()>="0" && e->text()<="9")
     lastkey += e->text();
   else
@@ -157,6 +163,12 @@ void Viewer::mouseMoveEvent(QMouseEvent *e) {
       }
       rebuildID();
     }
+  } else {
+    Point3 p(t.apply(Point3(e->pos().x()*1./hidpi_,
+                            e->pos().y()*1./hidpi_,
+                            0)));
+    message2->setText(QString("(%1,%2,%3)")
+                      .arg(int(p.x)).arg(int(p.y)).arg(int(p.z)));
   }
 }
 
@@ -230,6 +242,8 @@ void Viewer::resizeEvent(QResizeEvent *) {
   rebuild();
   message->move(5, height() - 40);
   message->resize(width()-10, 35);
+  message2->move(width()*2/3, height() - 40);
+  message2->resize(width()*1/3, 35);
 }
 
 void Viewer::rebuild() {

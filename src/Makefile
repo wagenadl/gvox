@@ -28,7 +28,7 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = gvox1.0.0
-DISTDIR = /home/wagenaar/progs/gvox/gvox/src/.tmp/gvox1.0.0
+DISTDIR = /home/wagenaar/progs/gvox/src/.tmp/gvox1.0.0
 SUBTARGETS    =  \
 		release \
 		debug

@@ -45,6 +45,7 @@ private:
   class PViewer *pviewer;
   QString lastkey;
   QLabel *message;
+  QLabel *message2;
 };
 
 #endif
