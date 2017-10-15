@@ -133,7 +133,13 @@ void Voxmap::loadFromJson(QString jsonfn) {
     return;
   }
 
-  QFile datafh(meta["outbase"].toString() + ".data");
+  QFileInfo info(jsonfn);
+  QDir parent(info.dir());
+  QString dirname = parent.absolutePath();
+  QString base = info.baseName();
+  meta["base"] = dirname + "/" + base;
+  
+  QFile datafh(basename() + ".data");
   if (datafh.open(QFile::ReadOnly)) {
     X = meta["width"].toInt();
     Y = meta["height"].toInt();
@@ -312,7 +318,7 @@ void Voxmap::scanLineTrilDepth(Transform3 const &t, int y, int nx, int nz,
 }
 
 QString Voxmap::basename() const {
-  return meta["outbase"].toString();
+  return meta["base"].toString();
 }
 
   
