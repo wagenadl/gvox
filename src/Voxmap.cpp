@@ -88,16 +88,16 @@ bool Voxmap::importDir(QString source, QString outbase) {
   meta["importdate"] = QDateTime::currentDateTime().toString();
   meta["label-xpositive"] = "Right";
   meta["label-xnegative"] = "Left";
-  meta["label-ypositive"] = "Bottom";
-  meta["label-ynegative"] = "Top";
-  meta["label-zpositive"] = "Far";
-  meta["label-znegative"] = "Near";
+  meta["label-ypositive"] = "Down";
+  meta["label-ynegative"] = "Up";
+  meta["label-zpositive"] = "Back";
+  meta["label-znegative"] = "Front";
   meta["label-xp"] = "R";
   meta["label-xn"] = "L";
-  meta["label-yp"] = "B";
-  meta["label-yn"] = "T";
-  meta["label-zp"] = "F";
-  meta["label-zn"] = "N";
+  meta["label-yp"] = "D";
+  meta["label-yn"] = "U";
+  meta["label-zp"] = "B";
+  meta["label-zn"] = "F";
 
 
   if (!saveJson(outbase + ".json"))
