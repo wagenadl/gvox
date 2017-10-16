@@ -52,9 +52,17 @@ void Viewer::buildLUT() {
       double z = (iz - HALFNZ) * 1.0 / HALFNZ;
       double z1 = (z>0) ? z : 0;
       double z2 = (z<0) ? z : 0;
-      uint8_t g(255.99*y*(1-z1*.75));
-      uint8_t r(255.99*y*(1+z2));
-      uint8_t b(255.99*y*(1+.25*z2));
+#if 1
+      // green when in front of object, purple when behind it
+	 uint8_t g(255.99*y*(1-z1*.75));
+	 uint8_t r(255.99*y*(1-.85*z2*z2));
+	 uint8_t b(255.99*y*(1+.2*z2));
+#else
+	 // blue when in front, yellow when beyind
+	 uint8_t g(255.99*y*(1 + .5*z2));
+	 uint8_t r(255.99*y*(1 + .75*z2));
+	 uint8_t b(255.99*y*(1 - z1));
+#endif
       lut[iz*256+x] = 0xff000000 + b + 256*g + 65536*r;
     }
   }
