@@ -43,7 +43,7 @@ Running GVox
 
 GVox is started from a terminal (shell) window like this:
 
-    gvox */path/to/data/images*
+    gvox /path/to/data/images
 
 where */path/to/data/images* is the name of a folder that contains a
 stack of jpeg or tiff files corresponding to the raw data. GVox
@@ -53,7 +53,7 @@ annotation data. These files are located in the parent folder of the
 source data folder (i.e., in */path/to/data* in the example
 above). The next time around, start gvox like this:
 
-    gvox */path/to/data/images.json*
+    gvox /path/to/data/images.json
 
 This will load the previously generated metadata and startup will be
 much faster.
@@ -83,7 +83,8 @@ drawing with the left mouse button erases previous annotations. Right
 click on an existing annotation object to draw more of that
 object. Alternatively, type the ID number of an existing object and
 “G" to center the view on that object and continue drawing it. For
-instance, typing the three keys “1”, “7”, “G” would select object #17. In a similar vein,  “1”, “7”, “D” erases object #17 entirely.
+instance, typing the three keys “1”, “7”, “G” would select object
+#17. In a similar vein, “1”, “7”, “D” erases object #17 entirely.
 
 Alternative visualization
 -------------------------
