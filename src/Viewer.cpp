@@ -420,6 +420,7 @@ void Viewer::gotoID(int id) {
   t = Transform3::shifter(delta.x, delta.y, delta.z) * t;
   rebuild();
   showPos(cm);
+  paintid = id;
   message->setText(QString("Centered on ID #%1").arg(id));
 }
 
