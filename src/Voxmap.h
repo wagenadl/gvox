@@ -15,9 +15,9 @@ public:
 public:
   Voxmap();
   ~Voxmap();
-  void loadFromJson(QString jsonfn);
-  void importDir(QString sourcedir, QString outbase);
-  void saveJson(QString jsonfn); // does not save raw data
+  bool loadFromJson(QString jsonfn);
+  bool importDir(QString sourcedir, QString outbase);
+  bool saveJson(QString jsonfn); // does not save raw data
   void clear();
   uint8_t const *bits() const { return data; } // use with care!
 public:

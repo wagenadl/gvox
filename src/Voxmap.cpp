@@ -45,14 +45,14 @@ void Voxmap::clear() {
   meta = QJsonObject();
 }  
 
-void Voxmap::importDir(QString source, QString outbase) {
+bool Voxmap::importDir(QString source, QString outbase) {
   clear();
   
   QStringList ifns;
   traverse(source, ifns);
   qDebug() << "Input files:" << ifns;
   if (ifns.isEmpty()) {
-    return;
+    return false;
   }
 
   QImage img(ifns[0]);
@@ -62,7 +62,7 @@ void Voxmap::importDir(QString source, QString outbase) {
   if (X*Y*Z > MAXMVOX*1024*1024) {
     qDebug() << "Image too large";
     clear();
-    return;
+    return false;
   }
   
   data = new uint8_t[X*Y*Z];
@@ -75,7 +75,7 @@ void Voxmap::importDir(QString source, QString outbase) {
     if (img.width()!=X || img.height()!=Y) {
       qDebug() << "size mismatch at " << z << ": " << ifns[z];
       clear();
-      return;
+      return false;
     }
     memcpy((void*)(data + z*zstride), (void const *)(img.bits()), X*Y);
   }
@@ -86,33 +86,22 @@ void Voxmap::importDir(QString source, QString outbase) {
   meta["source"] = source;
   meta["outbase"] = outbase;
   meta["importdate"] = QDateTime::currentDateTime().toString();
-  meta["label-xpositive"] = "X+";
-  meta["label-xnegative"] = "X-";
-  meta["label-ypositive"] = "Y+";
-  meta["label-ynegative"] = "Y-";
-  meta["label-zpositive"] = "Z+";
-  meta["label-znegative"] = "Z-";
-  meta["label-xp"] = "X+";
-  meta["label-xn"] = "X-";
-  meta["label-yp"] = "Y+";
-  meta["label-yn"] = "Y-";
-  meta["label-zp"] = "Z+";
-  meta["label-zn"] = "Z-";
+  meta["label-xpositive"] = "Right";
+  meta["label-xnegative"] = "Left";
+  meta["label-ypositive"] = "Bottom";
+  meta["label-ynegative"] = "Top";
+  meta["label-zpositive"] = "Far";
+  meta["label-znegative"] = "Near";
+  meta["label-xp"] = "R";
+  meta["label-xn"] = "L";
+  meta["label-yp"] = "B";
+  meta["label-yn"] = "T";
+  meta["label-zp"] = "F";
+  meta["label-zn"] = "N";
 
-  QJsonObject top;
 
-  qDebug() << "Saving...";
-
-  QFile jsonfile(outbase + ".json");
-  if (jsonfile.open(QFile::WriteOnly)) {
-    top["voxmap"] = meta;
-    QJsonDocument json(top);
-    jsonfile.write(json.toJson());
-    jsonfile.close();
-  } else {    
-    qDebug() << "Could not write json";
-  } 
-
+  if (!saveJson(outbase + ".json"))
+    return false;
 
   QFile datafile(outbase + ".data");
   if (datafile.open(QFile::WriteOnly)) {
@@ -123,26 +112,44 @@ void Voxmap::importDir(QString source, QString outbase) {
   } else {
     qDebug() << "Could not write data";
   }
+  return true;
 }
 
-void Voxmap::loadFromJson(QString jsonfn) {
+bool Voxmap::saveJson(QString jsonfn) {
+  qDebug() << "Saving...";
+
+  QJsonObject top;
+  QFile jsonfile(jsonfn);
+  if (jsonfile.open(QFile::WriteOnly)) {
+    top["voxmap"] = meta;
+    QJsonDocument json(top);
+    jsonfile.write(json.toJson());
+    jsonfile.close();
+  } else {    
+    qDebug() << "Could not write json";
+    return false;
+  }
+  return true;
+}  
+
+bool Voxmap::loadFromJson(QString jsonfn) {
   clear();
   QFile jsonfh(jsonfn);
   if (jsonfh.open(QFile::ReadOnly)) {
     QJsonDocument json = QJsonDocument::fromJson(jsonfh.read(1000*1000));
     if (!json.isObject()) {
       qDebug() << "Could not read valid json from" << jsonfn;
-      return;
+      return false; 
     }
     meta = json.object()["voxmap"].toObject();
     if (meta.isEmpty()) {
       qDebug() << "Could not get voxmap info from" << jsonfn;
-      return;
+      return false;
     }
     jsonfh.close();
   } else {
     qDebug() << "Could not read json file" << jsonfn;
-    return;
+    return false;
   }
 
   QFileInfo info(jsonfn);
@@ -164,7 +171,7 @@ void Voxmap::loadFromJson(QString jsonfn) {
     if (X*Y*Z > MAXMVOX*1024*1024) {
       qDebug() << "Image too large";
       clear();
-      return;
+      return false;
     }
     
     ystride = X;
@@ -175,14 +182,16 @@ void Voxmap::loadFromJson(QString jsonfn) {
       if (datafh.read((char *)(data + z*zstride), zstride) < zstride) {
 	qDebug() << "Unexpected eof";
 	clear();
-	return;
+	return false;
       }
     }
     datafh.close();
   } else {
     qDebug() << "Could not read data";
     clear();
+    return false;
   }
+  return true;
 }
 
 void Voxmap::setNullValue(uint8_t v) {
