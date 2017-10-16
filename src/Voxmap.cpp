@@ -86,6 +86,18 @@ void Voxmap::importDir(QString source, QString outbase) {
   meta["source"] = source;
   meta["outbase"] = outbase;
   meta["importdate"] = QDateTime::currentDateTime().toString();
+  meta["label-xpositive"] = "X+";
+  meta["label-xnegative"] = "X-";
+  meta["label-ypositive"] = "Y+";
+  meta["label-ynegative"] = "Y-";
+  meta["label-zpositive"] = "Z+";
+  meta["label-znegative"] = "Z-";
+  meta["label-xp"] = "X+";
+  meta["label-xn"] = "X-";
+  meta["label-yp"] = "Y+";
+  meta["label-yn"] = "Y-";
+  meta["label-zp"] = "Z+";
+  meta["label-zn"] = "Z-";
 
   QJsonObject top;
 
@@ -137,7 +149,11 @@ void Voxmap::loadFromJson(QString jsonfn) {
   QDir parent(info.dir());
   QString dirname = parent.absolutePath();
   QString base = info.baseName();
-  meta["base"] = dirname + "/" + base;
+  if (parent.exists(base + ".data")) {
+    meta["base"] = dirname + "/" + base;
+  } else {
+    meta["base"] = meta["outbase"];
+  }
   
   QFile datafh(basename() + ".data");
   if (datafh.open(QFile::ReadOnly)) {
@@ -321,4 +337,6 @@ QString Voxmap::basename() const {
   return meta["base"].toString();
 }
 
-  
+QString Voxmap::label(QString ax) const {
+  return meta["label-" + ax].toString();
+}

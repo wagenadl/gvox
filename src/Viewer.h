@@ -26,6 +26,12 @@ protected:
   void rebuildID();
   void ensurePViewer();
   void gotoID(int id);
+  void setViewMode();
+  void buildLUT();
+  QString axlabel(QString ax);
+  void showPos(Point3 p); // data coords
+  void showPos(QPoint p); // screen coords
+  void drawAxis(QString ax, QColor c, Point3 v);
 private:
   Transform3 t;
   int hidpi_;
@@ -41,6 +47,8 @@ private:
   Qt::KeyboardModifiers dragmods;
   QImage im0;
   uint16_t paintid;
+  static constexpr uint16_t DELETEID = 65535;
+  static constexpr uint16_t VIEWID = 0;
   bool showids;
   class PViewer *pviewer;
   QString lastkey;

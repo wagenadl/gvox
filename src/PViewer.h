@@ -15,6 +15,11 @@ public:
   void showOverlay(QString txt);
   virtual void keyPressEvent(QKeyEvent *) override;
 private:
+  static int xDirForZAxis(int ax);
+  static int yDirForZAxis(int ax);
+  void showDecorated(QImage &img, int zax,
+                     int zdir, int xdir, int ydir);
+private:
   QVector<QLabel *> panels;
   class QGridLayout *grid;
   class Projection *proj;

@@ -23,40 +23,51 @@ PViewer::~PViewer() {
   delete proj;
 }
 
-void PViewer::showTracings(QString txt) {
-  QImage img;
-  QString ttl;
-  QString lbl;
-
-  if (txt=="1") {
-    img = proj->flatids(0, 1, -1, 1);
-    ttl = "Right";
-    lbl = "Ant. Dorsal";
-  } else if (txt=="2") {
-    img = proj->flatids(1, 1, -1, -1);
-    ttl = "Ventral";
-    lbl = "R. Ant.";
-  } else if (txt=="3") {
-    img = proj->flatids(2, 1, 1, 1);
-    ttl = "Anterior";
-    lbl = "L. Dorsal";
-  } else if (txt=="4") {
-    img = proj->flatids(0, -1, 1, 1);
-    ttl = "Left";
-    lbl = "Post. Dorsal";
-  } else if (txt=="5") {
-    img = proj->flatids(1, -1, 1, -1);
-    ttl = "Dorsal";
-    lbl = "L. Ant.";
-  } else if (txt=="6") {
-    img = proj->flatids(2, -1, -1, 1);
-    ttl = "Posterior";
-    lbl = "R. Dorsal";
-  } else {
-    img = proj->flatids(1, 1, -1, -1);
-    ttl = "Ventral";
-    lbl = "R. Ant.";
+int PViewer::xDirForZAxis(int ax) {
+  switch (ax) {
+  case 0: return -1;
+  case 1: return -1;
+  case 2: return 1;
+  default: return 1;
   }
+}
+
+int PViewer::yDirForZAxis(int ax) {
+  switch (ax) {
+  case 0: return 1;
+  case 1: return -1;
+  case 2: return 1;
+  default: return 1;
+  }
+}
+
+void PViewer::showTracings(QString txt) {
+  bool ok;
+  int arg = txt.toInt(&ok) - 1;
+  if (!ok || arg<0)
+    arg = 1;
+  int zax = arg%3;
+  int zdir = (arg/3) ? -1 : 1;
+  int xdir = xDirForZAxis(zax);
+  int ydir = yDirForZAxis(zax);
+  if (zdir<0)
+    xdir = -xdir;
+  QImage img = proj->flatids(zax, zdir, xdir, ydir);
+
+  showDecorated(img, zax, zdir, xdir, ydir);
+}
+
+void PViewer::showDecorated(QImage &img, int zax,
+                            int zdir, int xdir, int ydir) {
+  int xax = (zax==0) ? 2 : 0;
+  int yax = (zax==1) ? 2 : 1;
+  QString zname = QChar('x' + zax);
+  QString ttl = vm->label(zname + ((zdir>0) ? "positive" : "negative"));
+  QString xname = QChar('x' + xax);
+  QString yname = QChar('x' + yax);
+  QString lbl = vm->label(xname + ((xdir<0) ? "positive" : "negative"))
+    + " " + vm->label(yname + ((ydir<0) ? "positive" : "negative"));
+
   QPainter ptr(&img);
   ptr.setPen(QColor(255, 255, 255));
   ptr.drawText(5, 30, lbl);
@@ -64,54 +75,23 @@ void PViewer::showTracings(QString txt) {
   QPixmap pm(QPixmap::fromImage(img));
   img.save(vm->basename() + "-" + ttl + "-traces.jpg");
   panels[0]->setPixmap(pm);
-  //  resize(pm.size()*2);
   setWindowTitle(ttl);
 }
 
 void PViewer::showOverlay(QString txt) {
-  QImage img;
-  QString ttl;
-  QString lbl;
-  panels[0]->setPixmap(QPixmap());
-  repaint();
-  if (txt=="1") {
-    img = proj->overlay(0, 1, -1, 1);
-    ttl = "Right";
-    lbl = "Ant. Dorsal";
-  } else if (txt=="2") {
-    img = proj->overlay(1, 1, -1, -1);
-    ttl = "Ventral";
-    lbl = "R. Ant.";
-  } else if (txt=="3") {
-    img = proj->overlay(2, 1, 1, 1);
-    ttl = "Anterior";
-    lbl = "L. Dorsal";
-  } else if (txt=="4") {
-    img = proj->overlay(0, -1, 1, 1);
-    ttl = "Left";
-    lbl = "Post. Dorsal";
-  } else if (txt=="5") {
-    img = proj->overlay(1, -1, 1, -1);
-    ttl = "Dorsal";
-    lbl = "L. Ant.";
-  } else if (txt=="6") {
-    img = proj->overlay(2, -1, -1, 1);
-    ttl = "Posterior";
-    lbl = "R. Dorsal";
-  } else {
-    img = proj->overlay(1, 1, -1, -1);
-    ttl = "Ventral";
-    lbl = "R. Ant.";
-  }
-  QPainter ptr(&img);
-  ptr.setPen(QColor(255, 255, 255));
-  ptr.drawText(5, 30, lbl);
-  ptr.drawText(5, img.height()-10, ttl + " aspect");
-  QPixmap pm(QPixmap::fromImage(img));
-  img.save(vm->basename() + "-" + ttl + ".jpg");
-  panels[0]->setPixmap(pm);
-  //  resize(pm.size()*2);
-  setWindowTitle(ttl);
+  bool ok;
+  int arg = txt.toInt(&ok) - 1;
+  if (!ok || arg<0)
+    arg = 1;
+  int zax = arg%3;
+  int zdir = (arg/3) ? -1 : 1;
+  int xdir = xDirForZAxis(zax);
+  int ydir = yDirForZAxis(zax);
+  if (zdir<0)
+    xdir = -xdir;
+  QImage img = proj->overlay(zax, zdir, xdir, ydir);
+
+  showDecorated(img, zax, zdir, xdir, ydir);
 }
 
 void PViewer::keyPressEvent(QKeyEvent *e) {

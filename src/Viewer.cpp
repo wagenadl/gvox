@@ -26,7 +26,21 @@ Viewer::Viewer(QWidget *parent): QLabel(parent) {
   setMouseTracking(true);
   setFocusPolicy(Qt::WheelFocus);
   dragbutton = Qt::NoButton;
+  buildLUT();
+  message = new QLabel(this);
+  message2 = new QLabel(this);
+  message->setPalette(QPalette(QColor("white"), QColor("black")));
+  message2->setPalette(QPalette(QColor("white"), QColor("black")));
+  message->setText("Initializing");
+  message2->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
+  setViewMode();
+}
 
+Viewer::~Viewer() {
+  delete pviewer;
+}
+
+void Viewer::buildLUT() {
   for (int x=0; x<256; x++) {
     double y = x/255.0;
     y = pow((y-.1)/.75, .5);
@@ -44,16 +58,7 @@ Viewer::Viewer(QWidget *parent): QLabel(parent) {
       lut[iz*256+x] = 0xff000000 + b + 256*g + 65536*r;
     }
   }
-  message = new QLabel(this);
-  message2 = new QLabel(this);
-  message->setPalette(QPalette(QColor("white"), QColor("black")));
-  message2->setPalette(QPalette(QColor("white"), QColor("black")));
-  message->setText("Initializing");
-}
-
-Viewer::~Viewer() {
-  delete pviewer;
-}
+}  
 
 void Viewer::setVoxmap(Voxmap *vm) {
   voxmap = vm;
@@ -70,24 +75,35 @@ void Viewer::setVoxmap(Voxmap *vm) {
 void Viewer::setIDmap(IDmap *im, int f) {
   idmap = im;
   idfactor = f;
-  paintid = (im) ? im->max()+1 : 1;
+  setViewMode();
   rebuildID();
+}
+
+void Viewer::setViewMode() {
+  paintid = VIEWID;
+  message->setText(QString("View mode"));
 }
 
 void Viewer::keyPressEvent(QKeyEvent *e) {
   switch (e->key()) {
   case Qt::Key_Delete: case Qt::Key_Backspace:
-    paintid = 0;
+    paintid = DELETEID;
     message->setText(QString("Erasing"));
-    qDebug() << "erasing";
+    break;
+  case Qt::Key_0: case Qt::Key_Space:
+    setViewMode();
     break;
   case Qt::Key_Slash:
     showids = !showids;
     rebuildID();
     break;
   case Qt::Key_Enter: case Qt::Key_Return:
-    paintid = (idmap) ? idmap->max()+1 : 1;
-    message->setText(QString("New ID #%1").arg(paintid));
+    if (idmap) {
+      paintid = idmap->max()+1;
+      message->setText(QString("New ID #%1").arg(paintid));
+    } else {
+      setViewMode();
+    }      
     break;
   case Qt::Key_T:
     ensurePViewer();
@@ -130,15 +146,22 @@ void Viewer::keyPressEvent(QKeyEvent *e) {
     lastkey = "";
 }
 
+void Viewer::showPos(QPoint p) {
+  showPos(t.apply(Point3(p.x()*1./hidpi_, p.y()*1./hidpi_, 0)));
+}
+
+void Viewer::showPos(Point3 p) {
+  message2->setText(QString("(%1,%2,%3)")
+                      .arg(int(p.x)).arg(int(p.y)).arg(int(p.z)));
+}
+
 void Viewer::mouseMoveEvent(QMouseEvent *e) {
   if (dragbutton==Qt::LeftButton && dragmods & Qt::ShiftModifier) {
     // shift-drag: move
     QPoint delta = e->pos() - dragbase;
     t = t0;
     t.shift(-delta.x()*1./hidpi_, -delta.y()*1./hidpi_, 0);
-    Point3 p(t.apply(Point3(width()/2./hidpi_, height()/2./hidpi_, 0)));
-    message->setText(QString("Centered on (%1,%2,%3)")
-		     .arg(int(p.x)).arg(int(p.y)).arg(int(p.z)));
+    showPos(e->pos());
     rebuild();
   } else if (dragbutton==Qt::LeftButton && dragmods & Qt::ControlModifier) {
     // control-drag: rotate 3D
@@ -146,29 +169,26 @@ void Viewer::mouseMoveEvent(QMouseEvent *e) {
     t = t0;
     t.rotate(-delta.x()/200./hidpi_, -delta.y()/200./hidpi_,
 	     dragbase.x()*1./hidpi_, dragbase.y()*1./hidpi_);
+    showPos(e->pos());
     rebuild();
   } else if (dragbutton==Qt::LeftButton && dragmods==Qt::NoModifier) {
     // paint!
     if (idmap) {
       Point3 p(tid.apply(Point3(e->pos().x()*1./hidpi_,
 				e->pos().y()*1./hidpi_, 0)));
-      if (paintid==0) {
+      if (paintid==DELETEID) {
         for (int dx=-1; dx<=1; dx++)
           for (int dy=-1; dy<=1; dy++)
             for (int dz=-1; dz<=1; dz++)
               idmap->paint(p.x+dx, p.y+dy, p.z+dz, paintid);
-      } else {
+      } else if (paintid>0) {
         idmap->paint(p.x, p.y, p.z, paintid);
 	message->setText(QString("Painting ID #%1").arg(paintid));
       }
       rebuildID();
     }
   } else {
-    Point3 p(t.apply(Point3(e->pos().x()*1./hidpi_,
-                            e->pos().y()*1./hidpi_,
-                            0)));
-    message2->setText(QString("(%1,%2,%3)")
-                      .arg(int(p.x)).arg(int(p.y)).arg(int(p.z)));
+    showPos(e->pos());
   }
 }
 
@@ -176,18 +196,23 @@ void Viewer::mouseDoubleClickEvent(QMouseEvent *e) {
   if (!idmap)
     return;
   if (e->button()==Qt::LeftButton && e->modifiers()==Qt::NoModifier) {
-    // paint cell body
-    const double Rf = 9./idfactor;
-    const int R = ceil(Rf);
-    Point3 p(tid.apply(Point3(e->pos().x()*1./hidpi_,
-			      e->pos().y()*1./hidpi_, 0)));
-    for (int dx=-R; dx<=R; dx++) 
-      for (int dy=-R; dy<=R; dy++) 
-	for (int dz=-R; dz<=R; dz++) 
-	  if (dx*dx + dy*dy + dz*dz < Rf*Rf)
-	    idmap->paint(p.x+dx, p.y+dy, p.z+dz, paintid);
-    message->setText(QString("Ball for ID #%1").arg(paintid));
-    rebuildID();
+    if (paintid != VIEWID) {
+      // paint cell body
+      const double Rf = 9./idfactor;
+      const int R = ceil(Rf);
+      Point3 p(tid.apply(Point3(e->pos().x()*1./hidpi_,
+                                e->pos().y()*1./hidpi_, 0)));
+      for (int dx=-R; dx<=R; dx++) 
+        for (int dy=-R; dy<=R; dy++) 
+          for (int dz=-R; dz<=R; dz++) 
+            if (dx*dx + dy*dy + dz*dz < Rf*Rf)
+              idmap->paint(p.x+dx, p.y+dy, p.z+dz, paintid);
+      if (paintid==DELETEID)
+        message->setText(QString("Ball for deletion"));
+      else
+        message->setText(QString("Ball for ID #%1").arg(paintid));
+      rebuildID();
+    }
   } else if (e->button()==Qt::RightButton) {
       Point3 p(tid.apply(Point3(e->pos().x()*1./hidpi_,
 				e->pos().y()*1./hidpi_, 0)));
@@ -205,8 +230,8 @@ void Viewer::mousePressEvent(QMouseEvent *e) {
   if (dragbutton==Qt::RightButton) {
     Point3 p(tid.apply(Point3(e->pos().x()*1./hidpi_,
 			      e->pos().y()*1./hidpi_, 0)));
-      paintid = idmap->getf(p.x, p.y, p.z);
-      message->setText(QString("Adding to ID #%1").arg(paintid));
+    paintid = idmap->getf(p.x, p.y, p.z);
+    message->setText(QString("Adding to ID #%1").arg(paintid));
   } else if (dragmods==Qt::NoModifier) {
     mouseMoveEvent(e); // treat as paint
   }
@@ -227,14 +252,11 @@ void Viewer::wheelEvent(QWheelEvent *e) {
     Point3 p1(t.apply(Point3(0,0,0)));
     Point3 p2(t.apply(Point3(100,0,0)));
     message->setText(QString("Scale: %1%").arg(int(1e4/((p1-p2).length()))));
-    rebuild();
   } else if (e->modifiers() & Qt::ShiftModifier) {
     // wheel + shift: move in Z
     t.shift(0, 0, delta.y()/40.0);
-    Point3 p(t.apply(Point3(width()/2./hidpi_, height()/2./hidpi_, 0)));
-    message->setText(QString("Centered on (%1,%2,%3)")
-		     .arg(int(p.x)).arg(int(p.y)).arg(int(p.z)));
   } 
+  showPos(e->pos());
   rebuild();
 }
 
@@ -243,7 +265,7 @@ void Viewer::resizeEvent(QResizeEvent *) {
   message->move(5, height() - 40);
   message->resize(width()-10, 35);
   message2->move(width()*2/3, height() - 40);
-  message2->resize(width()*1/3, 35);
+  message2->resize(width()*1/3 -5, 35);
 }
 
 void Viewer::rebuild() {
@@ -356,33 +378,9 @@ void Viewer::paintEvent(QPaintEvent *e) {
     dy3 /= dy3.length() + 1e-9;
     dz3 /= dz3.length() + 1e-9;
 
-    QPainter p(this);
-    QPointF dx(dx3.x, dx3.y);
-    QPointF dy(dy3.x, dy3.y);
-    QPointF dz(dz3.x, dz3.y);
-    float S = 30*hidpi_;
-    QPointF XY0(S*2, S*2);
-
-    p.setPen(QPen(QColor(255,0,0), 2));
-    p.drawLine(XY0 - .8*dx*S, XY0 + .8*dx*S);
-    p.drawText(QRectF(XY0+dx*S, QSize(100,100)).translated(-50, -50),
-	       Qt::AlignCenter, "R");
-    p.drawText(QRectF(XY0-dx*S, QSize(100,100)).translated(-50, -50),
-	       Qt::AlignCenter, "L");
-
-    p.setPen(QPen(QColor(0, 255, 0), 2));
-    p.drawLine(XY0 - .8*dy*S, XY0 + .8*dy*S);
-    p.drawText(QRectF(XY0+dy*S, QSize(100,100)).translated(-50, -50),
-	       Qt::AlignCenter, "V");
-    p.drawText(QRectF(XY0-dy*S, QSize(100,100)).translated(-50, -50),
-	       Qt::AlignCenter, "D");
-
-    p.setPen(QPen(QColor(50, 100, 255), 2));
-    p.drawLine(XY0 -.8*dz*S, XY0 + .8*dz*S);
-    p.drawText(QRectF(XY0+dz*S, QSize(100,100)).translated(-50, -50),
-	       Qt::AlignCenter, "A");
-    p.drawText(QRectF(XY0-dz*S, QSize(100,100)).translated(-50, -50),
-	       Qt::AlignCenter, "P");
+    drawAxis("x", QColor(255,0,0), dx3);
+    drawAxis("y", QColor(0,180,0), dy3);
+    drawAxis("z", QColor(0,0,255), dz3);
   }
 }
 
@@ -413,5 +411,41 @@ void Viewer::gotoID(int id) {
   Point3 delta = cm - current;
   t = Transform3::shifter(delta.x, delta.y, delta.z) * t;
   rebuild();
+  showPos(cm);
   message->setText(QString("Centered on ID #%1").arg(id));
 }
+
+QString Viewer::axlabel(QString ax) {
+  if (voxmap)
+    return voxmap->label(ax);
+  else
+    return ax;
+}
+
+void Viewer::drawAxis(QString ax, QColor c, Point3 v) {
+  QPainter p(this);
+  QPointF scr(v.x, v.y);
+  float S = 30*hidpi_;
+  QPointF XY0(S*2, S*2);
+  QColor czp = QColor(255,192,255);
+  QColor czn = QColor(160,255,170);
+  QColor cp = c;
+  QColor cn = c;
+  if (fabs(v.z) > .7*v.length()) {
+    if (v.z>0) {
+      cp = czp;
+      cn = czn;
+    } else {
+      cp = czn;
+      cn = czp;
+    }
+  }
+  p.setPen(QPen(cp, 2));
+  p.drawLine(XY0, XY0 + .8*scr*S);
+  p.drawText(QRectF(XY0+scr*S, QSize(100,100)).translated(-50, -50),
+             Qt::AlignCenter, axlabel(ax+"p"));
+  p.setPen(QPen(cn, 2));
+  p.drawLine(XY0, XY0 - .8*scr*S);
+  p.drawText(QRectF(XY0-scr*S, QSize(100,100)).translated(-50, -50),
+             Qt::AlignCenter, axlabel(ax+"n"));
+}   

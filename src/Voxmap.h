@@ -25,6 +25,7 @@ public:
   int width() const { return X; }
   int height() const { return Y; }
   int depth() const { return Z; }
+  QString label(QString ax) const;
   //  double xResoNM() const;
   //  double yResoNM() const;
   //  double zResoNM() const;
