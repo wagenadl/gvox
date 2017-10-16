@@ -90,7 +90,7 @@ void Viewer::keyPressEvent(QKeyEvent *e) {
     paintid = DELETEID;
     message->setText(QString("Erasing"));
     break;
-  case Qt::Key_0: case Qt::Key_Space:
+  case Qt::Key_Space:
     setViewMode();
     break;
   case Qt::Key_Slash:
