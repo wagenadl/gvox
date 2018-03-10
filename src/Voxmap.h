@@ -20,6 +20,8 @@ public:
   bool saveJson(QString jsonfn); // does not save raw data
   void clear();
   uint8_t const *bits() const { return data; } // use with care!
+  QString name(int id) const;
+  void setName(int id, QString n);
 public:
   QString basename() const;
   int width() const { return X; }
@@ -86,6 +88,8 @@ private:
   uint8_t *data;
   uint8_t nullval;
   QJsonObject meta;
+  QJsonObject names;
+  QString jsonFilename;
 };
 
 #endif

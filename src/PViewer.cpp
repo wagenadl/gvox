@@ -41,10 +41,9 @@ int PViewer::yDirForZAxis(int ax) {
   }
 }
 
-void PViewer::showTracings(QString txt) {
-  bool ok;
-  int arg = txt.toInt(&ok) - 1;
-  if (!ok || arg<0)
+void PViewer::showTracings(int txt) {
+  int arg = txt - 1;
+  if (arg<0)
     arg = 1;
   int zax = arg%3;
   int zdir = (arg/3) ? -1 : 1;
@@ -78,10 +77,9 @@ void PViewer::showDecorated(QImage &img, int zax,
   setWindowTitle(ttl);
 }
 
-void PViewer::showOverlay(QString txt) {
-  bool ok;
-  int arg = txt.toInt(&ok) - 1;
-  if (!ok || arg<0)
+void PViewer::showOverlay(int txt) {
+  int arg = txt - 1;
+  if (arg<0)
     arg = 1;
   int zax = arg%3;
   int zdir = (arg/3) ? -1 : 1;

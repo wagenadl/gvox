@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1237</width>
+    <height>847</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="Viewer" name="viewer"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1237</width>
+     <height>39</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionOpen"/>
+    <addaction name="actionExport"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+    <addaction name="actionDocumentation"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <widget class="QMenu" name="menuProjection">
+     <property name="title">
+      <string>Traces</string>
+     </property>
+     <addaction name="actionRight"/>
+     <addaction name="actionVentral"/>
+     <addaction name="actionAnterior"/>
+     <addaction name="actionLeft"/>
+     <addaction name="actionDorsal"/>
+     <addaction name="actionPosterior"/>
+    </widget>
+    <widget class="QMenu" name="menuOverlay">
+     <property name="title">
+      <string>Overlay</string>
+     </property>
+     <addaction name="actionORight"/>
+     <addaction name="actionOVentral"/>
+     <addaction name="actionOAnterior"/>
+     <addaction name="actionOLeft"/>
+     <addaction name="actionODorsal"/>
+     <addaction name="actionOPosterior"/>
+    </widget>
+    <addaction name="menuProjection"/>
+    <addaction name="menuOverlay"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionCopy"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuView"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QDockWidget" name="modes">
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Mouse action:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="select">
+       <property name="text">
+        <string>Select object</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="add">
+       <property name="text">
+        <string>Add to object</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="erase">
+       <property name="text">
+        <string>Erase pixels</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QWidget" name="widget_3" native="true">
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <property name="spacing">
+         <number>6</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QToolButton" name="pnew">
+          <property name="text">
+           <string>New</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="pfind">
+          <property name="text">
+           <string>Find</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QWidget" name="widget" native="true">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="spacing">
+         <number>6</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Obj ID:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="id">
+          <property name="text">
+           <string>01</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="pdel">
+          <property name="text">
+           <string>Delete</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QWidget" name="widget_2" native="true">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <property name="spacing">
+         <number>6</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Name:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="name"/>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open...</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionDraw_new_object">
+   <property name="text">
+    <string>Draw new object</string>
+   </property>
+  </action>
+  <action name="actionDelete_object">
+   <property name="text">
+    <string>Delete object</string>
+   </property>
+  </action>
+  <action name="actionSelect_object">
+   <property name="text">
+    <string>Select object</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="actionDocumentation">
+   <property name="text">
+    <string>Documentation</string>
+   </property>
+  </action>
+  <action name="actionVentral">
+   <property name="text">
+    <string>Ventral</string>
+   </property>
+  </action>
+  <action name="actionDorsal">
+   <property name="text">
+    <string>Dorsal</string>
+   </property>
+  </action>
+  <action name="actionLeft">
+   <property name="text">
+    <string>Left</string>
+   </property>
+  </action>
+  <action name="actionRight">
+   <property name="text">
+    <string>Right</string>
+   </property>
+  </action>
+  <action name="actionAnterior">
+   <property name="text">
+    <string>Anterior</string>
+   </property>
+  </action>
+  <action name="actionPosterior">
+   <property name="text">
+    <string>Posterior</string>
+   </property>
+  </action>
+  <action name="actionORight">
+   <property name="text">
+    <string>Right</string>
+   </property>
+  </action>
+  <action name="actionOVentral">
+   <property name="text">
+    <string>Ventral</string>
+   </property>
+  </action>
+  <action name="actionOAnterior">
+   <property name="text">
+    <string>Anterior</string>
+   </property>
+  </action>
+  <action name="actionOLeft">
+   <property name="text">
+    <string>Left</string>
+   </property>
+  </action>
+  <action name="actionODorsal">
+   <property name="text">
+    <string>Dorsal</string>
+   </property>
+  </action>
+  <action name="actionOPosterior">
+   <property name="text">
+    <string>Posterior</string>
+   </property>
+  </action>
+  <action name="actionExport">
+   <property name="text">
+    <string>Export</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="text">
+    <string>Copy image to clipboard</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Viewer</class>
+   <extends>QWidget</extends>
+   <header>Viewer.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

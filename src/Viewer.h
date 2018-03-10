@@ -8,11 +8,34 @@
 #include <QLabel>
 
 class Viewer: public QLabel {
+  Q_OBJECT;
+public:
+  enum Mode {
+    Select,
+    Draw,
+    Erase
+  };
 public:
   Viewer(QWidget *parent=0);
   ~Viewer();
   void setVoxmap(class Voxmap *voxmap);
   void setIDmap(class IDmap *voxmap, int factor);
+  int id() const { return paintid; }
+public slots:
+  void setMode(Mode);
+  void setName(QString);
+  void doExport();
+  void showOverlay(int);
+  void showTraces(int);
+  void copy();
+  void add();
+  void del();
+  void toggleIDs();
+  void find(int id);
+  void find(QString name);
+signals:
+  void selectionChanged(int);
+protected:
   virtual void mouseMoveEvent(QMouseEvent *) override;
   virtual void keyPressEvent(QKeyEvent *) override;
   virtual void mousePressEvent(QMouseEvent *) override;
@@ -26,7 +49,6 @@ protected:
   void rebuildID();
   void ensurePViewer();
   void gotoID(int id);
-  void setViewMode();
   void buildLUT();
   QString axlabel(QString ax);
   void showPos(Point3 p); // data coords
@@ -47,13 +69,12 @@ private:
   Qt::KeyboardModifiers dragmods;
   QImage im0;
   uint16_t paintid;
-  static constexpr uint16_t DELETEID = 65535;
-  static constexpr uint16_t VIEWID = 0;
   bool showids;
   class PViewer *pviewer;
   QString lastkey;
   QLabel *message;
   QLabel *message2;
+  Mode mode;
 };
 
 #endif

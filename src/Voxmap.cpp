@@ -122,6 +122,7 @@ bool Voxmap::saveJson(QString jsonfn) {
   QFile jsonfile(jsonfn);
   if (jsonfile.open(QFile::WriteOnly)) {
     top["voxmap"] = meta;
+    top["names"] = names;
     QJsonDocument json(top);
     jsonfile.write(json.toJson());
     jsonfile.close();
@@ -130,7 +131,23 @@ bool Voxmap::saveJson(QString jsonfn) {
     return false;
   }
   return true;
-}  
+}
+
+QString Voxmap::name(int id) const {
+  QString idn = QString::number(id);
+  if (names.contains(idn))
+    return names[idn].toString();
+  else
+    return "";
+}
+
+void Voxmap::setName(int id, QString n) {
+  if (name(id)!=n) {
+    QString idn = QString::number(id);
+    names[idn] = n;
+    saveJson(jsonFilename);
+  }
+}
 
 bool Voxmap::loadFromJson(QString jsonfn) {
   clear();
@@ -146,7 +163,9 @@ bool Voxmap::loadFromJson(QString jsonfn) {
       qDebug() << "Could not get voxmap info from" << jsonfn;
       return false;
     }
+    names = json.object()["names"].toObject();
     jsonfh.close();
+    jsonFilename = jsonfn;
   } else {
     qDebug() << "Could not read json file" << jsonfn;
     return false;
