@@ -15,6 +15,12 @@ public:
     Draw,
     Erase
   };
+  enum View {
+    All,
+    Named,
+    Anon,
+    None
+  };
 public:
   Viewer(QWidget *parent=0);
   ~Viewer();
@@ -30,7 +36,7 @@ public slots:
   void copy();
   void add();
   void del();
-  void toggleIDs();
+  void setView(View);
   void find(int id);
   void find(QString name);
 signals:
@@ -69,12 +75,12 @@ private:
   Qt::KeyboardModifiers dragmods;
   QImage im0;
   uint16_t paintid;
-  bool showids;
   class PViewer *pviewer;
   QString lastkey;
   QLabel *message;
   QLabel *message2;
   Mode mode;
+  View view;
 };
 
 #endif

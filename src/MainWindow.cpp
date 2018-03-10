@@ -14,7 +14,23 @@
 constexpr int IDFACTOR = 2;
 
 void showDocs() {
-  qDebug() << "Docs";
+  QFile f(":/README.txt");
+  if (!f.open(QFile::ReadOnly)) {
+    qDebug() << "Docs!?";
+    return;
+  }
+  QString txt = QString(f.readAll());
+  QStringList bits = txt.split("\n\n");
+  
+  QString me = "<b>gvox</b>";
+  QString vsn = "0.1";
+  txt = me + " " + vsn
+                     + "<p>" + "(C) 2018 Daniel A. Wagenaar\n"
+    + "<p>" + me + " is a program for displaying and annotating gigavoxel volumes.\n";
+  for (auto b: bits)
+    txt += "<p>" + b;
+  
+  QMessageBox::about(0, me, txt);
 }
 
 void showAbout() {
@@ -80,6 +96,15 @@ MainWindow::MainWindow() {
   connect(ui->actionDocumentation, &QAction::triggered,
           []() { showDocs(); });
 
+  connect(ui->sall, &QRadioButton::toggled,
+          [this](bool b) { if (b) ui->viewer->setView(Viewer::All); });
+  connect(ui->snamed, &QRadioButton::toggled,
+          [this](bool b) { if (b) ui->viewer->setView(Viewer::Named); });
+  connect(ui->sanon, &QRadioButton::toggled,
+          [this](bool b) { if (b) ui->viewer->setView(Viewer::Anon); });
+  connect(ui->snone, &QRadioButton::toggled,
+          [this](bool b) { if (b) ui->viewer->setView(Viewer::None); });
+  
   connect(ui->select, &QRadioButton::toggled,
           [this](bool b) { if (b) ui->viewer->setMode(Viewer::Select); });
   connect(ui->add, &QRadioButton::toggled,

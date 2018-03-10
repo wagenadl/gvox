@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_Viewer_t {
-    QByteArrayData data[16];
-    char stringdata0[114];
+    QByteArrayData data[17];
+    char stringdata0[117];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -43,15 +43,17 @@ QT_MOC_LITERAL(8, 67, 10), // "showTraces"
 QT_MOC_LITERAL(9, 78, 4), // "copy"
 QT_MOC_LITERAL(10, 83, 3), // "add"
 QT_MOC_LITERAL(11, 87, 3), // "del"
-QT_MOC_LITERAL(12, 91, 9), // "toggleIDs"
-QT_MOC_LITERAL(13, 101, 4), // "find"
-QT_MOC_LITERAL(14, 106, 2), // "id"
-QT_MOC_LITERAL(15, 109, 4) // "name"
+QT_MOC_LITERAL(12, 91, 7), // "setView"
+QT_MOC_LITERAL(13, 99, 4), // "View"
+QT_MOC_LITERAL(14, 104, 4), // "find"
+QT_MOC_LITERAL(15, 109, 2), // "id"
+QT_MOC_LITERAL(16, 112, 4) // "name"
 
     },
     "Viewer\0selectionChanged\0\0setMode\0Mode\0"
     "setName\0doExport\0showOverlay\0showTraces\0"
-    "copy\0add\0del\0toggleIDs\0find\0id\0name"
+    "copy\0add\0del\0setView\0View\0find\0id\0"
+    "name"
 };
 #undef QT_MOC_LITERAL
 
@@ -80,9 +82,9 @@ static const uint qt_meta_data_Viewer[] = {
        9,    0,   90,    2, 0x0a /* Public */,
       10,    0,   91,    2, 0x0a /* Public */,
       11,    0,   92,    2, 0x0a /* Public */,
-      12,    0,   93,    2, 0x0a /* Public */,
-      13,    1,   94,    2, 0x0a /* Public */,
-      13,    1,   97,    2, 0x0a /* Public */,
+      12,    1,   93,    2, 0x0a /* Public */,
+      14,    1,   96,    2, 0x0a /* Public */,
+      14,    1,   99,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::Int,    2,
@@ -96,9 +98,9 @@ static const uint qt_meta_data_Viewer[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void,
-    QMetaType::Void, QMetaType::Int,   14,
-    QMetaType::Void, QMetaType::QString,   15,
+    QMetaType::Void, 0x80000000 | 13,    2,
+    QMetaType::Void, QMetaType::Int,   15,
+    QMetaType::Void, QMetaType::QString,   16,
 
        0        // eod
 };
@@ -118,7 +120,7 @@ void Viewer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
         case 6: _t->copy(); break;
         case 7: _t->add(); break;
         case 8: _t->del(); break;
-        case 9: _t->toggleIDs(); break;
+        case 9: _t->setView((*reinterpret_cast< View(*)>(_a[1]))); break;
         case 10: _t->find((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 11: _t->find((*reinterpret_cast< QString(*)>(_a[1]))); break;
         default: ;

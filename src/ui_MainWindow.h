@@ -14,6 +14,7 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QDockWidget>
+#include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
@@ -67,10 +68,17 @@ public:
     QDockWidget *modes;
     QWidget *dockWidgetContents;
     QVBoxLayout *verticalLayout;
-    QLabel *label_3;
+    QGroupBox *groupBox;
+    QVBoxLayout *verticalLayout_2;
     QRadioButton *select;
     QRadioButton *add;
     QRadioButton *erase;
+    QGroupBox *groupBox_2;
+    QVBoxLayout *verticalLayout_3;
+    QRadioButton *sall;
+    QRadioButton *snamed;
+    QRadioButton *sanon;
+    QRadioButton *snone;
     QSpacerItem *verticalSpacer;
     QWidget *widget_3;
     QHBoxLayout *horizontalLayout_3;
@@ -162,26 +170,60 @@ public:
         dockWidgetContents->setObjectName(QStringLiteral("dockWidgetContents"));
         verticalLayout = new QVBoxLayout(dockWidgetContents);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
-        label_3 = new QLabel(dockWidgetContents);
-        label_3->setObjectName(QStringLiteral("label_3"));
-
-        verticalLayout->addWidget(label_3);
-
-        select = new QRadioButton(dockWidgetContents);
+        groupBox = new QGroupBox(dockWidgetContents);
+        groupBox->setObjectName(QStringLiteral("groupBox"));
+        verticalLayout_2 = new QVBoxLayout(groupBox);
+        verticalLayout_2->setSpacing(6);
+        verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
+        verticalLayout_2->setContentsMargins(6, 6, 0, 6);
+        select = new QRadioButton(groupBox);
         select->setObjectName(QStringLiteral("select"));
         select->setChecked(true);
 
-        verticalLayout->addWidget(select);
+        verticalLayout_2->addWidget(select);
 
-        add = new QRadioButton(dockWidgetContents);
+        add = new QRadioButton(groupBox);
         add->setObjectName(QStringLiteral("add"));
 
-        verticalLayout->addWidget(add);
+        verticalLayout_2->addWidget(add);
 
-        erase = new QRadioButton(dockWidgetContents);
+        erase = new QRadioButton(groupBox);
         erase->setObjectName(QStringLiteral("erase"));
 
-        verticalLayout->addWidget(erase);
+        verticalLayout_2->addWidget(erase);
+
+
+        verticalLayout->addWidget(groupBox);
+
+        groupBox_2 = new QGroupBox(dockWidgetContents);
+        groupBox_2->setObjectName(QStringLiteral("groupBox_2"));
+        verticalLayout_3 = new QVBoxLayout(groupBox_2);
+        verticalLayout_3->setSpacing(6);
+        verticalLayout_3->setObjectName(QStringLiteral("verticalLayout_3"));
+        verticalLayout_3->setContentsMargins(6, 6, 0, 6);
+        sall = new QRadioButton(groupBox_2);
+        sall->setObjectName(QStringLiteral("sall"));
+        sall->setChecked(true);
+
+        verticalLayout_3->addWidget(sall);
+
+        snamed = new QRadioButton(groupBox_2);
+        snamed->setObjectName(QStringLiteral("snamed"));
+
+        verticalLayout_3->addWidget(snamed);
+
+        sanon = new QRadioButton(groupBox_2);
+        sanon->setObjectName(QStringLiteral("sanon"));
+
+        verticalLayout_3->addWidget(sanon);
+
+        snone = new QRadioButton(groupBox_2);
+        snone->setObjectName(QStringLiteral("snone"));
+
+        verticalLayout_3->addWidget(snone);
+
+
+        verticalLayout->addWidget(groupBox_2);
 
         verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
@@ -317,10 +359,15 @@ public:
         menuProjection->setTitle(QApplication::translate("MainWindow", "Traces", Q_NULLPTR));
         menuOverlay->setTitle(QApplication::translate("MainWindow", "Overlay", Q_NULLPTR));
         menuEdit->setTitle(QApplication::translate("MainWindow", "Edit", Q_NULLPTR));
-        label_3->setText(QApplication::translate("MainWindow", "Mouse action:", Q_NULLPTR));
+        groupBox->setTitle(QApplication::translate("MainWindow", "Mouse action:", Q_NULLPTR));
         select->setText(QApplication::translate("MainWindow", "Select object", Q_NULLPTR));
         add->setText(QApplication::translate("MainWindow", "Add to object", Q_NULLPTR));
         erase->setText(QApplication::translate("MainWindow", "Erase pixels", Q_NULLPTR));
+        groupBox_2->setTitle(QApplication::translate("MainWindow", "Show:", Q_NULLPTR));
+        sall->setText(QApplication::translate("MainWindow", "All objects", Q_NULLPTR));
+        snamed->setText(QApplication::translate("MainWindow", "Named objects", Q_NULLPTR));
+        sanon->setText(QApplication::translate("MainWindow", "Unnamed objects", Q_NULLPTR));
+        snone->setText(QApplication::translate("MainWindow", "Nothing", Q_NULLPTR));
         pnew->setText(QApplication::translate("MainWindow", "New", Q_NULLPTR));
         pfind->setText(QApplication::translate("MainWindow", "Find", Q_NULLPTR));
         label->setText(QApplication::translate("MainWindow", "Obj ID:", Q_NULLPTR));

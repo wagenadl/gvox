@@ -19,7 +19,7 @@ Viewer::Viewer(QWidget *parent): QLabel(parent) {
   pviewer = 0;
   voxmap = 0;
   idmap = 0;
-  showids = true;
+  view = All;
   idfactor = 1;
   hidpi_ = 3;
   setScaledContents(false);
@@ -122,15 +122,15 @@ void Viewer::del() {
   }
 }
 
-void Viewer::toggleIDs() {
-  showids = !showids;
+void Viewer::setView(View v) {
+  view = v;
   rebuildID();
 }
 
 void Viewer::keyPressEvent(QKeyEvent *e) {
   switch (e->key()) {
   case Qt::Key_Slash:
-    toggleIDs();
+    //toggleIDs();
     break;
   case Qt::Key_T:
     showTraces(lastkey.toInt());
@@ -339,7 +339,8 @@ void Viewer::rebuildID() {
   static DistinctColors dc;
   int w = width() / hidpi_;
   int h = height() / hidpi_;
-  if (idmap && showids) {
+  if (idmap && view!=None) {
+    QMap<int, bool> use;
     QImage img(im0);
     img.setPixel(QPoint(0,0), 0xffffffff); // force detach
     int nthreads = 4;
@@ -353,9 +354,25 @@ void Viewer::rebuildID() {
 	  uint32_t *bits = (uint32_t*)(img.scanLine(y));
 	  idmap->scanLine(tid, y, w, buf);
 	  for (int x=0; x<w; x++) {
-	    if (buf[x]) {
+            int v = buf[x];
+            if (v && !use.contains(v)) {
+              switch (view) {
+              case All:
+                use[v] = true;
+                break;
+              case Named:
+                use[v] = voxmap->name(v) != "";
+                break;
+              case Anon:
+                use[v] = voxmap->name(v) == "";
+                break;
+              case None:
+                use[v] = false;
+              }
+            }
+	    if (v && use[v]) {
 	      uint8_t *dst = (uint8_t*)(bits);
-	      uint32_t cc = dc.color(buf[x]);
+	      uint32_t cc = dc.color(v);
 	      uint8_t const *src = (uint8_t const *)(&cc);
 	      int r = dst[0];
 	      int g = dst[1];
@@ -500,8 +517,11 @@ void Viewer::setMode(Viewer::Mode m) {
 }
 
 void Viewer::setName(QString name) {
-  if (paintid>0)
+  if (paintid>0) {
     voxmap->setName(paintid, name);
+    if (view==Anon || view == Named)
+      rebuildID();
+  }
 }
 
 void Viewer::doExport() {
