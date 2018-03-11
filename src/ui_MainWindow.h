@@ -83,7 +83,9 @@ public:
     QWidget *widget_3;
     QHBoxLayout *horizontalLayout_3;
     QToolButton *pnew;
-    QToolButton *pfind;
+    QSpacerItem *horizontalSpacer;
+    QLabel *label_3;
+    QLineEdit *pfind;
     QSpacerItem *verticalSpacer_2;
     QWidget *widget;
     QHBoxLayout *horizontalLayout;
@@ -240,8 +242,22 @@ public:
 
         horizontalLayout_3->addWidget(pnew);
 
-        pfind = new QToolButton(widget_3);
+        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        horizontalLayout_3->addItem(horizontalSpacer);
+
+        label_3 = new QLabel(widget_3);
+        label_3->setObjectName(QStringLiteral("label_3"));
+
+        horizontalLayout_3->addWidget(label_3);
+
+        pfind = new QLineEdit(widget_3);
         pfind->setObjectName(QStringLiteral("pfind"));
+        QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(pfind->sizePolicy().hasHeightForWidth());
+        pfind->setSizePolicy(sizePolicy);
 
         horizontalLayout_3->addWidget(pfind);
 
@@ -369,7 +385,7 @@ public:
         sanon->setText(QApplication::translate("MainWindow", "Unnamed objects", Q_NULLPTR));
         snone->setText(QApplication::translate("MainWindow", "Nothing", Q_NULLPTR));
         pnew->setText(QApplication::translate("MainWindow", "New", Q_NULLPTR));
-        pfind->setText(QApplication::translate("MainWindow", "Find", Q_NULLPTR));
+        label_3->setText(QApplication::translate("MainWindow", "Go to:", Q_NULLPTR));
         label->setText(QApplication::translate("MainWindow", "Obj ID:", Q_NULLPTR));
         id->setText(QApplication::translate("MainWindow", "01", Q_NULLPTR));
         pdel->setText(QApplication::translate("MainWindow", "Delete", Q_NULLPTR));

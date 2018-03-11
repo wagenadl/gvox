@@ -131,7 +131,7 @@ MainWindow::MainWindow() {
           [this]() { ui->viewer->add(); ui->add->setChecked(true); });
   connect(ui->pdel, &QToolButton::clicked,
           [this]() { ui->viewer->del(); ui->select->setChecked(true); });
-  connect(ui->pfind, &QToolButton::clicked,
+  connect(ui->pfind, &QLineEdit::returnPressed,
           [this]() { findDialog(); });
 }
 
@@ -192,5 +192,14 @@ void MainWindow::doLoad() {
 }
   
 void MainWindow::findDialog() {
-  qDebug() << "Find";
+  QString txt = ui->pfind->text();
+  qDebug() << "Find" << txt;
+  bool ok;
+  int id = txt.toInt(&ok);
+  if (ok) {
+    ui->viewer->find(id);
+  } else {
+    if (!ui->viewer->find(txt))
+      qDebug() << "not found";
+  }
 }

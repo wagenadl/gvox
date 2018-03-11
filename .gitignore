@@ -3,3 +3,7 @@
 src/Makefile
 .qmake.stash
 gvox
+debug
+release
+ui_*.h
+moc_*.cpp

@@ -133,6 +133,14 @@ bool Voxmap::saveJson(QString jsonfn) {
   return true;
 }
 
+int Voxmap::find(QString name) const {
+  name = name.toLower();
+  for (QString idn: names.keys()) 
+    if (names[idn].toString().toLower() == name)
+      return idn.toInt();
+  return 0;
+}
+
 QString Voxmap::name(int id) const {
   QString idn = QString::number(id);
   if (names.contains(idn))

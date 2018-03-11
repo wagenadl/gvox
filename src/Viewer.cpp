@@ -14,6 +14,7 @@
 #include "PViewer.h"
 #include <QGuiApplication>
 #include <QClipboard>
+#include <QTimerEvent>
 
 Viewer::Viewer(QWidget *parent): QLabel(parent) {
   pviewer = 0;
@@ -34,6 +35,7 @@ Viewer::Viewer(QWidget *parent): QLabel(parent) {
   message->setText("Initializing");
   message2->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
   setMode(Select);
+  showcross = false;
 }
 
 Viewer::~Viewer() {
@@ -340,7 +342,6 @@ void Viewer::rebuildID() {
   int w = width() / hidpi_;
   int h = height() / hidpi_;
   if (idmap && view!=None) {
-    QMap<int, bool> use;
     QImage img(im0);
     img.setPixel(QPoint(0,0), 0xffffffff); // force detach
     int nthreads = 4;
@@ -349,6 +350,7 @@ void Viewer::rebuildID() {
       int y0 = h*i/nthreads;
       int y1 = h*(i+1)/nthreads;
       auto foo = [&](int y0, int y1) {
+        QMap<int, bool> use;
 	uint16_t buf[w];
 	for (int y=y0; y<y1; y++) {
 	  uint32_t *bits = (uint32_t*)(img.scanLine(y));
@@ -434,6 +436,17 @@ void Viewer::paintEvent(QPaintEvent *e) {
     drawAxis("y", QColor(0,180,0), dy3);
     drawAxis("z", QColor(0,0,255), dz3);
   }
+
+  if (showcross) {
+    QPainter ptr;
+    ptr.begin(this);
+    ptr.setPen(QPen(QColor(255,255,255), 2));
+    ptr.drawLine(width()/2-20, height()/2,
+                 width()/2+20, height()/2);
+    ptr.drawLine(width()/2, height()/2-20,
+                 width()/2, height()/2+20);
+    ptr.end();
+  }
 }
 
 void Viewer::ensurePViewer() {
@@ -446,8 +459,13 @@ void Viewer::find(int id) {
   gotoID(id);
 }
 
-void Viewer::find(QString name) {
+bool Viewer::find(QString name) {
   qDebug() << "find" << name;
+  int id = voxmap->find(name);
+  qDebug() << "-> id" << id;
+  if (id>0)
+    gotoID(id);
+  return id>0;
 }
 
 void Viewer::gotoID(int id) {
@@ -475,6 +493,14 @@ void Viewer::gotoID(int id) {
   paintid = id;
   emit selectionChanged(paintid);
   message->setText(QString("Centered on ID #%1").arg(id));
+  showcross = true;
+  startTimer(1000);
+}
+
+void Viewer::timerEvent(QTimerEvent *e) {
+  killTimer(e->timerId());
+  showcross = false;
+  update();
 }
 
 QString Viewer::axlabel(QString ax) {

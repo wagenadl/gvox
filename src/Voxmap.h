@@ -22,6 +22,7 @@ public:
   uint8_t const *bits() const { return data; } // use with care!
   QString name(int id) const;
   void setName(int id, QString n);
+  int find(QString name) const;
 public:
   QString basename() const;
   int width() const { return X; }

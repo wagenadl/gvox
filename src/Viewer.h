@@ -38,7 +38,7 @@ public slots:
   void del();
   void setView(View);
   void find(int id);
-  void find(QString name);
+  bool find(QString name);
 signals:
   void selectionChanged(int);
 protected:
@@ -50,6 +50,7 @@ protected:
   virtual void wheelEvent(QWheelEvent *) override;
   virtual void resizeEvent(QResizeEvent *) override;
   virtual void paintEvent(QPaintEvent *) override;
+  void timerEvent(QTimerEvent *) override;
 protected:
   void rebuild();
   void rebuildID();
@@ -81,6 +82,7 @@ private:
   QLabel *message2;
   Mode mode;
   View view;
+  bool showcross;
 };
 
 #endif
