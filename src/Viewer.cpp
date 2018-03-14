@@ -17,12 +17,11 @@
 #include <QTimerEvent>
 
 Viewer::Viewer(QWidget *parent): QLabel(parent) {
-  pviewer = 0;
   voxmap = 0;
   idmap = 0;
   view = All;
   idfactor = 1;
-  hidpi_ = 3;
+  hidpi_ = 2;
   setScaledContents(false);
   setMouseTracking(true);
   setFocusPolicy(Qt::WheelFocus);
@@ -39,33 +38,45 @@ Viewer::Viewer(QWidget *parent): QLabel(parent) {
 }
 
 Viewer::~Viewer() {
-  delete pviewer;
+  for (auto p: pviewer)
+    delete p;
+}
+
+inline uint8_t clip8(double z) {
+  if (z<0)
+    return 0;
+  else if (z>1)
+    return 255;
+  else
+    return uint8_t(255.99*z);
 }
 
 void Viewer::buildLUT() {
   for (int x=0; x<256; x++) {
     double y = x/255.0;
-    y = pow((y-.1)/.75, .5);
-    if (y<0)
+    y = (y-.1)/.75;
+    if (y<=0)
       y = 0;
     else if (y>1)
       y = 1;
+    else
+      y = pow(y, .5);
     for (int iz=0; iz<=HALFNZ*2; iz++) {
       double z = (iz - HALFNZ) * 1.0 / HALFNZ;
       double z1 = (z>0) ? z : 0;
       double z2 = (z<0) ? z : 0;
 #if 1
       // green when in front of object, purple when behind it
-	 uint8_t g(255.99*y*(1-z1*.75));
-	 uint8_t r(255.99*y*(1-.85*z2*z2));
-	 uint8_t b(255.99*y*(1+.2*z2));
+      uint8_t g(clip8(y*(1-z1*.75)));
+      uint8_t r(clip8(y*(1-.85*z2*z2)));
+      uint8_t b(clip8(y*(1+.2*z2)));
 #else
 	 // blue when in front, yellow when beyind
 	 uint8_t g(255.99*y*(1 + .5*z2));
 	 uint8_t r(255.99*y*(1 + .75*z2));
 	 uint8_t b(255.99*y*(1 - z1));
 #endif
-      lut[iz*256+x] = 0xff000000 + b + 256*g + 65536*r;
+      lut[iz*256+x] = 0xff000000u + b + 256u*g + 65536u*r;
     }
   }
 }  
@@ -90,16 +101,16 @@ void Viewer::setIDmap(IDmap *im, int f) {
 }
 
 void Viewer::showOverlay(int k) {
-  ensurePViewer();
+  ensurePViewer(k);
   QCursor c0 = cursor();
   setCursor(Qt::WaitCursor);
-  pviewer->showOverlay(k);
+  pviewer[k]->showOverlay(k);
   setCursor(c0);
 }
 
 void Viewer::showTraces(int k) {
-  ensurePViewer();
-  pviewer->showTracings(k);
+  ensurePViewer(10 + k);
+  pviewer[10+k]->showTracings(k);
 }
 
 void Viewer::copy() {
@@ -176,19 +187,20 @@ void Viewer::showPos(Point3 p) {
 }
 
 void Viewer::mouseMoveEvent(QMouseEvent *e) {
-  if (dragbutton==Qt::LeftButton && dragmods & Qt::ShiftModifier) {
-    // shift-drag: move
-    QPoint delta = e->pos() - dragbase;
-    t = t0;
-    t.shift(-delta.x()*1./hidpi_, -delta.y()*1./hidpi_, 0);
-    showPos(e->pos());
-    rebuild();
-  } else if (dragbutton==Qt::LeftButton && dragmods & Qt::ControlModifier) {
+  if (dragbutton==Qt::LeftButton && dragmods & Qt::ControlModifier) {
     // control-drag: rotate 3D
     QPoint delta = e->pos() - dragbase;
     t = t0;
     t.rotate(-delta.x()/200./hidpi_, -delta.y()/200./hidpi_,
 	     dragbase.x()*1./hidpi_, dragbase.y()*1./hidpi_);
+    showPos(e->pos());
+    rebuild();
+  } else if (dragbutton==Qt::LeftButton && (dragmods & Qt::ShiftModifier
+				     || mode==Select)) {
+    // shift-drag: move
+    QPoint delta = e->pos() - dragbase;
+    t = t0;
+    t.shift(-delta.x()*1./hidpi_, -delta.y()*1./hidpi_, 0);
     showPos(e->pos());
     rebuild();
   } else if (dragbutton==Qt::LeftButton && dragmods==Qt::NoModifier
@@ -270,9 +282,8 @@ void Viewer::mousePressEvent(QMouseEvent *e) {
     paintid = idmap->getf(p.x, p.y, p.z);
     emit selectionChanged(paintid);
   } else if (dragmods==Qt::NoModifier) {
-    mouseMoveEvent(e); // treat as paint
+    mouseMoveEvent(e);
   }
-  
 }
 
 void Viewer::mouseReleaseEvent(QMouseEvent *) {
@@ -289,7 +300,8 @@ void Viewer::wheelEvent(QWheelEvent *e) {
     Point3 p1(t.apply(Point3(0,0,0)));
     Point3 p2(t.apply(Point3(100,0,0)));
     message->setText(QString("Scale: %1%").arg(int(1e4/((p1-p2).length()))));
-  } else if (e->modifiers() & Qt::ShiftModifier) {
+  } else if (e->modifiers() & Qt::ShiftModifier
+	     || mode==Select) {
     // wheel + shift: move in Z
     t.shift(0, 0, delta.y()/40.0);
   } 
@@ -299,10 +311,10 @@ void Viewer::wheelEvent(QWheelEvent *e) {
 
 void Viewer::resizeEvent(QResizeEvent *) {
   rebuild();
-  message->move(5, height() - 40);
+  message->move(5, height() - 50);
   message->resize(width()-10, 35);
-  message2->move(width()*2/3, height() - 40);
-  message2->resize(width()*1/3 -5, 35);
+  message2->move(5, height() - 50);
+  message2->resize(width()-10, 35);
 }
 
 void Viewer::rebuild() {
@@ -319,7 +331,7 @@ void Viewer::rebuild() {
       auto foo = [&](int y0, int y1) {
 	for (int y=y0; y<y1; y++) {
 	  uint32_t *bits = (uint32_t*)(img.scanLine(y));
-	  voxmap->scanLineTrilDepth(t, y, w, 10, bits, lut);
+	  voxmap->scanLineTrilDepth(t, y, w, HALFNZ*2+1, bits, lut);
 	}
       };
       thr[i] = new std::thread{foo, y0, y1};
@@ -449,10 +461,10 @@ void Viewer::paintEvent(QPaintEvent *e) {
   }
 }
 
-void Viewer::ensurePViewer() {
-  if (!pviewer) 
-    pviewer = new PViewer(voxmap, idmap);
-  pviewer->show();
+void Viewer::ensurePViewer(int k) {
+  if (!pviewer.contains(k)) 
+    pviewer[k] = new PViewer(voxmap, idmap);
+  pviewer[k]->show();
 }
 
 void Viewer::find(int id) {

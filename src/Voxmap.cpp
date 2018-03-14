@@ -281,7 +281,7 @@ void Voxmap::scanLineTril(Transform3 const &t, int y, int z, int nx,
  This assumes pre-multiplied alpha.
  */
 
-void Voxmap::scanLineTrilDepth(Transform3 const &t, int y, int nx, int nz,
+void Voxmap::scanLineTrilDepth8(Transform3 const &t, int y, int nx, int nz,
 			       uint8_t *dest, uint8_t const *lut) {
   Point3 p0 = t.apply(Point3(0, y, (nz-1)/2.));
   float x0 = p0.x;
@@ -363,7 +363,7 @@ void Voxmap::scanLineTrilDepth(Transform3 const &t, int y, int nx, int nz,
     uint8_t r1 = r*255.99;
     uint8_t g1 = g*255.99;
     uint8_t b1 = b*255.99;
-    *dest++ = 0xff000000 + b1 + 256*g1 + 65536*r1;
+    *dest++ = 0xff000000u + b1 + 256u*g1 + 65536u*r1;
     x0 += dx;
     y0 += dy;
     z0 += dz;

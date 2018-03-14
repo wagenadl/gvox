@@ -54,7 +54,7 @@ protected:
 protected:
   void rebuild();
   void rebuildID();
-  void ensurePViewer();
+  void ensurePViewer(int k);
   void gotoID(int id);
   void buildLUT();
   QString axlabel(QString ax);
@@ -76,7 +76,7 @@ private:
   Qt::KeyboardModifiers dragmods;
   QImage im0;
   uint16_t paintid;
-  class PViewer *pviewer;
+  QMap<int, class PViewer *> pviewer;
   QString lastkey;
   QLabel *message;
   QLabel *message2;

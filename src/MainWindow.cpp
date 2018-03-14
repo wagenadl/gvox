@@ -177,7 +177,7 @@ void MainWindow::open(QString fn) {
 }
 
 void MainWindow::doLoad() {
-  voxmap->setNullValue(200);
+  voxmap->setNullValue(0);
   
   if (idmap)
     delete idmap;

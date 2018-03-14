@@ -44,9 +44,9 @@ public:
   void scanLine(Transform3 const &t, int y, int z, int nx, uint8_t *dest,
                 uint8_t const *lut);
   uint8_t trilinear(float x, float y, float z) const {
-    int x0 = int(x);
-    int y0 = int(y);
-    int z0 = int(z);
+    int x0 = floor(x);
+    int y0 = floor(y);
+    int z0 = floor(z);
     x -= x0;
     y -= y0;
     z -= z0;
@@ -77,7 +77,7 @@ public:
   }
   void scanLineTril(Transform3 const &t, int y, int z, int nx,
 		    uint8_t *dest, uint8_t const *lut);
-  void scanLineTrilDepth(Transform3 const &t, int y, int nx, int nz,
+  void scanLineTrilDepth8(Transform3 const &t, int y, int nx, int nz,
 			 uint8_t *dest, uint8_t const *lut);
   void scanLineTrilDepth(Transform3 const &t, int y, int nx, int nz,
 			 uint32_t *dest, uint32_t const *lut); // RGB version, deep lut
