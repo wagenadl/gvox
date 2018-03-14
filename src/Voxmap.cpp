@@ -85,6 +85,7 @@ bool Voxmap::importDir(QString source, QString outbase) {
   meta["depth"] = Z;
   meta["source"] = source;
   meta["outbase"] = outbase;
+  meta["base"] = outbase;
   meta["importdate"] = QDateTime::currentDateTime().toString();
   meta["label-xpositive"] = "Right";
   meta["label-xnegative"] = "Left";
