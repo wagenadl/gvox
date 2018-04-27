@@ -92,6 +92,21 @@ void PViewer::showOverlay(int txt) {
   showDecorated(img, zax, zdir, xdir, ydir);
 }
 
+void PViewer::showProjection(int txt) {
+  int arg = txt - 1;
+  if (arg<0)
+    arg = 1;
+  int zax = arg%3;
+  int zdir = (arg/3) ? -1 : 1;
+  int xdir = xDirForZAxis(zax);
+  int ydir = yDirForZAxis(zax);
+  if (zdir<0)
+    xdir = -xdir;
+  QImage img = proj->projection(zax, zdir, xdir, ydir);
+
+  showDecorated(img, zax, zdir, xdir, ydir);
+}
+
 void PViewer::keyPressEvent(QKeyEvent *e) {
   switch (e->key()) {
   case Qt::Key_C:

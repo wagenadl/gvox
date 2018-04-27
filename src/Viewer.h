@@ -32,6 +32,7 @@ public slots:
   void setName(QString);
   void doExport();
   void showOverlay(int);
+  void showProjection(int);
   void showTraces(int);
   void copy();
   void add();

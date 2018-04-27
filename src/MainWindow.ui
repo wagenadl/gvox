@@ -27,6 +27,7 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionImport"/>
     <addaction name="actionOpen"/>
     <addaction name="actionExport"/>
     <addaction name="actionQuit"/>
@@ -64,8 +65,20 @@
      <addaction name="actionODorsal"/>
      <addaction name="actionOPosterior"/>
     </widget>
+    <widget class="QMenu" name="menuProjection_2">
+     <property name="title">
+      <string>Projection</string>
+     </property>
+     <addaction name="actionPRight"/>
+     <addaction name="actionPVentral"/>
+     <addaction name="actionPAnterior"/>
+     <addaction name="actionPLeft"/>
+     <addaction name="actionPDorsal"/>
+     <addaction name="actionPPosterior"/>
+    </widget>
     <addaction name="menuProjection"/>
     <addaction name="menuOverlay"/>
+    <addaction name="menuProjection_2"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -454,6 +467,41 @@
   <action name="actionCopy">
    <property name="text">
     <string>Copy image to clipboard</string>
+   </property>
+  </action>
+  <action name="actionPRight">
+   <property name="text">
+    <string>Right</string>
+   </property>
+  </action>
+  <action name="actionPVentral">
+   <property name="text">
+    <string>Ventral</string>
+   </property>
+  </action>
+  <action name="actionPAnterior">
+   <property name="text">
+    <string>Anterior</string>
+   </property>
+  </action>
+  <action name="actionPLeft">
+   <property name="text">
+    <string>Left</string>
+   </property>
+  </action>
+  <action name="actionPDorsal">
+   <property name="text">
+    <string>Dorsal</string>
+   </property>
+  </action>
+  <action name="actionPPosterior">
+   <property name="text">
+    <string>Posterior</string>
+   </property>
+  </action>
+  <action name="actionImport">
+   <property name="text">
+    <string>Import...</string>
    </property>
   </action>
  </widget>

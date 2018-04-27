@@ -262,3 +262,126 @@ QImage Projection::overlay(int ax, int dir, int xdir, int ydir) {
 
   return img;
 }
+
+QImage Projection::projection(int ax, int dir, int xdir, int ydir) {
+  static uint8_t *lut = projlut();
+  static DistinctColors dc;
+
+  if (!voxmap)
+    return QImage();
+  
+  /* X,Y are in output image; x,y,z in voxmap.
+   */
+
+  int NX, NY, NZ; // output coordinates
+  int xstride, ystride, zstride;
+  switch (ax) {
+  case 0: // project along x-axis; X=z, Y=y.
+    NX = voxmap->depth() & ~1;
+    xstride = voxmap->width()*voxmap->height();
+    NY = voxmap->height() & ~1;
+    ystride = voxmap->width();
+    NZ = voxmap->width() & ~1;
+    zstride = 1;
+    break;
+  case 1: // project along y-axis; X=x, Y=z.
+    NX = voxmap->width() & ~1;
+    xstride = 1;
+    NY = voxmap->depth() & ~1;
+    ystride = voxmap->width()*voxmap->height();
+    NZ = voxmap->height() & ~1;
+    zstride = voxmap->width();
+    break;
+  case 2: // project along z-axis; X=x, Y=y.
+    NX = voxmap->width() & ~1;
+    xstride = 1;
+    NY = voxmap->height() & ~1;
+    ystride = voxmap->width();
+    NZ = voxmap->depth() & ~1;
+    zstride = voxmap->width() * voxmap->height();
+    break;
+  default:
+    return QImage();
+  }
+
+  uint8_t const *src = voxmap->bits();
+
+  if (dir<0) {
+    src += (NZ-1)*zstride;
+    zstride = -zstride;
+  }
+  if (xdir<0) {
+    src += (NX-1)*xstride;
+    xstride = -xstride;
+  }
+  if (ydir<0) {
+    src += (NY-1)*ystride;
+    ystride = -ystride;
+  }
+    
+
+  QImage img(NX, NY, QImage::Format_RGB32);
+
+  auto foo = [&](int Y0, int Y1) {
+    qDebug() << "start" << Y0 << Y1;
+    uint8_t const *ysrc = src + Y0*ystride;
+    for (int Y=Y0; Y<Y1; Y++) {
+      uint32_t *dst = (uint32_t*)img.scanLine(Y);
+      uint8_t const *xsrc = ysrc;
+      for (int X=0; X<NX; X++) {
+	float r=0, g=0, b=0;
+	// float a=1;
+	uint8_t const *zsrc = xsrc;
+	for (int Z=0; Z<NZ; Z++) {
+	  float gry = lut[*zsrc] / 255.0;
+	  float rh = gry;
+	  float gh = gry;
+	  float bh = gry;
+	  float ah = gry*.030;
+          // dull?
+          rh *= ah;
+          gh *= ah;
+          bh *= ah;
+
+	  // alpha blend
+	  r = rh + r * (1-ah);
+	  g = gh + g * (1-ah);
+	  b = bh + b * (1-ah);
+	  
+	  zsrc += zstride;
+	}
+	r *= 1.5;
+	g *= 1.5;
+	b *= 1.5;
+	if (r>1)
+	  r=1;
+	if (g>1)
+	  g=1;
+	if (b>1)
+	  b=1;
+	uint8_t ri(r*255.99);
+	uint8_t gi(g*255.99);
+	uint8_t bi(b*255.99);
+	*dst++ = 0xff000000 + (ri<<16) + (gi<<8) + bi;
+	xsrc += xstride;
+      }
+      ysrc += ystride;
+    }
+  };
+
+  int nthreads = 4;
+  std::thread *thr[nthreads];
+  for (int i=0; i<nthreads; i++) {
+    int y0 = NY*i/nthreads/2;
+    int y1 = NY*(i+1)/nthreads/2;
+    thr[i] = new std::thread{foo, y0*2, y1*2};
+  }
+  for (int i=0; i<nthreads; i++) {
+    thr[i]->join();
+  }
+  for (int i=0; i<nthreads; i++) {
+    delete thr[i];
+  }
+
+  return img;
+}

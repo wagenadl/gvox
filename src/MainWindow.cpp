@@ -55,6 +55,8 @@ MainWindow::MainWindow() {
   ui->name->setEnabled(false);
   ui->pdel->setEnabled(false);
   
+  connect(ui->actionImport, &QAction::triggered,
+          [this]() { importDialog(); });
   connect(ui->actionOpen, &QAction::triggered,
           [this]() { openDialog(); });
   connect(ui->actionExport, &QAction::triggered,
@@ -90,7 +92,20 @@ MainWindow::MainWindow() {
           [this]() { ui->viewer->showOverlay(5); });
   connect(ui->actionOPosterior, &QAction::triggered,
           [this]() { ui->viewer->showOverlay(6); });
-  
+
+    connect(ui->actionPRight, &QAction::triggered,
+          [this]() { ui->viewer->showProjection(1); });
+  connect(ui->actionPVentral, &QAction::triggered,
+          [this]() { ui->viewer->showProjection(2); });
+  connect(ui->actionPAnterior, &QAction::triggered,
+          [this]() { ui->viewer->showProjection(3); });
+  connect(ui->actionPLeft, &QAction::triggered,
+          [this]() { ui->viewer->showProjection(4); });
+  connect(ui->actionPDorsal, &QAction::triggered,
+          [this]() { ui->viewer->showProjection(5); });
+  connect(ui->actionPPosterior, &QAction::triggered,
+          [this]() { ui->viewer->showProjection(6); });
+
   connect(ui->actionAbout, &QAction::triggered,
           []() { showAbout(); });
   connect(ui->actionDocumentation, &QAction::triggered,

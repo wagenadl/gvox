@@ -108,6 +108,14 @@ void Viewer::showOverlay(int k) {
   setCursor(c0);
 }
 
+void Viewer::showProjection(int k) {
+  ensurePViewer(20+k);
+  QCursor c0 = cursor();
+  setCursor(Qt::WaitCursor);
+  pviewer[20+k]->showProjection(k);
+  setCursor(c0);
+}
+
 void Viewer::showTraces(int k) {
   ensurePViewer(10 + k);
   pviewer[10+k]->showTracings(k);
