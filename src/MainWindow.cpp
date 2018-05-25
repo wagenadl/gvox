@@ -148,6 +148,13 @@ MainWindow::MainWindow() {
           [this]() { ui->viewer->del(); ui->select->setChecked(true); });
   connect(ui->pfind, &QLineEdit::returnPressed,
           [this]() { findDialog(); });
+
+  connect(ui->blackSlider, &QSlider::valueChanged,
+	  [this]() { rebuildLUT(); });
+  connect(ui->whiteSlider, &QSlider::valueChanged,
+	  [this]() { rebuildLUT(); });
+  connect(ui->gammaSlider, &QSlider::valueChanged,
+	  [this]() { rebuildLUT(); });
 }
 
 MainWindow::~MainWindow() {
@@ -155,6 +162,16 @@ MainWindow::~MainWindow() {
   // delete voxmap;
 }
 
+void MainWindow::rebuildLUT() {
+  uint8_t blk = ui->blackSlider->value();
+  uint8_t wht = ui->whiteSlider->value();
+  float gamma = pow(2, ui->gammaSlider->value()/25);
+  ui->blackValue->setText(QString::number(blk));
+  ui->whiteValue->setText(QString::number(wht));
+  ui->gammaValue->setText(QString("%1").arg(gamma,2,'f',1));
+  ui->viewer->buildLUT(blk, wht, gamma);
+}
+  
 void MainWindow::importDialog() {
   QString dir = QDir::home().absoluteFilePath("Desktop");
   QString fn = QFileDialog::getExistingDirectory(0,

@@ -19,6 +19,7 @@ private:
   void importDialog();
   void doLoad();
   void findDialog();
+  void rebuildLUT();
 private:
   class Ui_MainWindow *ui;
   class Voxmap *voxmap;

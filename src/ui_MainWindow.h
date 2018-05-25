@@ -14,6 +14,7 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QDockWidget>
+#include <QtWidgets/QGridLayout>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
@@ -23,6 +24,7 @@
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QRadioButton>
+#include <QtWidgets/QSlider>
 #include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QToolButton>
@@ -87,6 +89,17 @@ public:
     QRadioButton *snamed;
     QRadioButton *sanon;
     QRadioButton *snone;
+    QGroupBox *groupBox_3;
+    QGridLayout *gridLayout;
+    QSlider *whiteSlider;
+    QSlider *gammaSlider;
+    QSlider *blackSlider;
+    QLabel *label_5;
+    QLabel *label_6;
+    QLabel *label_4;
+    QLabel *blackValue;
+    QLabel *whiteValue;
+    QLabel *gammaValue;
     QSpacerItem *verticalSpacer;
     QWidget *widget_3;
     QHBoxLayout *horizontalLayout_3;
@@ -109,7 +122,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(1237, 847);
+        MainWindow->resize(1237, 1274);
         actionOpen = new QAction(MainWindow);
         actionOpen->setObjectName(QStringLiteral("actionOpen"));
         actionQuit = new QAction(MainWindow);
@@ -250,6 +263,68 @@ public:
 
 
         verticalLayout->addWidget(groupBox_2);
+
+        groupBox_3 = new QGroupBox(dockWidgetContents);
+        groupBox_3->setObjectName(QStringLiteral("groupBox_3"));
+        gridLayout = new QGridLayout(groupBox_3);
+        gridLayout->setObjectName(QStringLiteral("gridLayout"));
+        whiteSlider = new QSlider(groupBox_3);
+        whiteSlider->setObjectName(QStringLiteral("whiteSlider"));
+        whiteSlider->setMaximum(255);
+        whiteSlider->setValue(255);
+        whiteSlider->setOrientation(Qt::Horizontal);
+
+        gridLayout->addWidget(whiteSlider, 1, 1, 1, 1);
+
+        gammaSlider = new QSlider(groupBox_3);
+        gammaSlider->setObjectName(QStringLiteral("gammaSlider"));
+        gammaSlider->setMinimum(-99);
+        gammaSlider->setOrientation(Qt::Horizontal);
+
+        gridLayout->addWidget(gammaSlider, 3, 1, 1, 1);
+
+        blackSlider = new QSlider(groupBox_3);
+        blackSlider->setObjectName(QStringLiteral("blackSlider"));
+        blackSlider->setMaximum(255);
+        blackSlider->setOrientation(Qt::Horizontal);
+
+        gridLayout->addWidget(blackSlider, 0, 1, 1, 1);
+
+        label_5 = new QLabel(groupBox_3);
+        label_5->setObjectName(QStringLiteral("label_5"));
+
+        gridLayout->addWidget(label_5, 1, 0, 1, 1);
+
+        label_6 = new QLabel(groupBox_3);
+        label_6->setObjectName(QStringLiteral("label_6"));
+
+        gridLayout->addWidget(label_6, 3, 0, 1, 1);
+
+        label_4 = new QLabel(groupBox_3);
+        label_4->setObjectName(QStringLiteral("label_4"));
+
+        gridLayout->addWidget(label_4, 0, 0, 1, 1);
+
+        blackValue = new QLabel(groupBox_3);
+        blackValue->setObjectName(QStringLiteral("blackValue"));
+        blackValue->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+
+        gridLayout->addWidget(blackValue, 0, 2, 1, 1);
+
+        whiteValue = new QLabel(groupBox_3);
+        whiteValue->setObjectName(QStringLiteral("whiteValue"));
+        whiteValue->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+
+        gridLayout->addWidget(whiteValue, 1, 2, 1, 1);
+
+        gammaValue = new QLabel(groupBox_3);
+        gammaValue->setObjectName(QStringLiteral("gammaValue"));
+        gammaValue->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+
+        gridLayout->addWidget(gammaValue, 3, 2, 1, 1);
+
+
+        verticalLayout->addWidget(groupBox_3);
 
         verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
@@ -424,6 +499,13 @@ public:
         snamed->setText(QApplication::translate("MainWindow", "Named objects", Q_NULLPTR));
         sanon->setText(QApplication::translate("MainWindow", "Unnamed objects", Q_NULLPTR));
         snone->setText(QApplication::translate("MainWindow", "Nothing", Q_NULLPTR));
+        groupBox_3->setTitle(QApplication::translate("MainWindow", "Brightness and contrast:", Q_NULLPTR));
+        label_5->setText(QApplication::translate("MainWindow", "White", Q_NULLPTR));
+        label_6->setText(QApplication::translate("MainWindow", "Gamma", Q_NULLPTR));
+        label_4->setText(QApplication::translate("MainWindow", "Black", Q_NULLPTR));
+        blackValue->setText(QApplication::translate("MainWindow", "0", Q_NULLPTR));
+        whiteValue->setText(QApplication::translate("MainWindow", "255", Q_NULLPTR));
+        gammaValue->setText(QApplication::translate("MainWindow", "1.0", Q_NULLPTR));
         pnew->setText(QApplication::translate("MainWindow", "New", Q_NULLPTR));
         label_3->setText(QApplication::translate("MainWindow", "Go to:", Q_NULLPTR));
         label->setText(QApplication::translate("MainWindow", "Obj ID:", Q_NULLPTR));
