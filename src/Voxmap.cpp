@@ -335,8 +335,8 @@ void Voxmap::scanLineTrilDepth(Transform3 const &t, int y, int nx, int nz,
     float y1 = y0;
     float z1 = z0;
     for (int iz=0; iz<=nz/2; iz++) { // first half
-      uint32_t herergb = lut[256*iz+trilinear(x1, y1, z1)];
-      float rh = ((herergb>>16) & 255)/255.0;
+      uint32_t herergb = lut[256*iz+trilinear(x1, y1, z1)]; 
+     float rh = ((herergb>>16) & 255)/255.0;
       float gh = ((herergb>>8) & 255)/255.0;
       float bh = ((herergb) & 255)/255.0;
       float ah = bh*bh; // OK?

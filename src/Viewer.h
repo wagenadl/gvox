@@ -40,6 +40,7 @@ public slots:
   void setView(View);
   void find(int id);
   bool find(QString name);
+  void buildLUT(uint8_t blk=0, uint8_t wht=255, float gamma=1);
 signals:
   void selectionChanged(int);
 protected:
@@ -57,7 +58,6 @@ protected:
   void rebuildID();
   void ensurePViewer(int k);
   void gotoID(int id);
-  void buildLUT();
   QString axlabel(QString ax);
   void showPos(Point3 p); // data coords
   void showPos(QPoint p); // screen coords

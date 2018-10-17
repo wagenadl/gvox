@@ -26,7 +26,6 @@ Viewer::Viewer(QWidget *parent): QLabel(parent) {
   setMouseTracking(true);
   setFocusPolicy(Qt::WheelFocus);
   dragbutton = Qt::NoButton;
-  buildLUT();
   message = new QLabel(this);
   message2 = new QLabel(this);
   message->setPalette(QPalette(QColor("white"), QColor("black")));
@@ -35,6 +34,7 @@ Viewer::Viewer(QWidget *parent): QLabel(parent) {
   message2->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
   setMode(Select);
   showcross = false;
+  buildLUT();
 }
 
 Viewer::~Viewer() {
@@ -51,16 +51,16 @@ inline uint8_t clip8(double z) {
     return uint8_t(255.99*z);
 }
 
-void Viewer::buildLUT() {
+void Viewer::buildLUT(uint8_t blk, uint8_t wht, float gamma) {
   for (int x=0; x<256; x++) {
     double y = x/255.0;
-    y = (y-.1)/.75;
+    y = (y-(blk/255.0))/(wht/255.0 - blk/255.0);
     if (y<=0)
       y = 0;
-    else if (y>1)
+    else if (y>=1)
       y = 1;
     else
-      y = pow(y, .5);
+      y = pow(y, gamma);
     for (int iz=0; iz<=HALFNZ*2; iz++) {
       double z = (iz - HALFNZ) * 1.0 / HALFNZ;
       double z1 = (z>0) ? z : 0;
@@ -79,6 +79,7 @@ void Viewer::buildLUT() {
       lut[iz*256+x] = 0xff000000u + b + 256u*g + 65536u*r;
     }
   }
+  rebuild();
 }  
 
 void Viewer::setVoxmap(Voxmap *vm) {
@@ -422,7 +423,7 @@ void Viewer::rebuildID() {
   } else {
     setPixmap(QPixmap::fromImage(im0.scaled(hidpi_*w, hidpi_*h)));
   }
-}  
+}
 
 inline float sq(float x) {
   return x*x;
