@@ -77,7 +77,9 @@ bool Voxmap::importDir(QString source, QString outbase) {
       clear();
       return false;
     }
-    memcpy((void*)(data + z*zstride), (void const *)(img.bits()), X*Y);
+    for (int y=0; y<Y; y++)
+      memcpy((void*)(data + z*zstride + y*X),
+             (void const *)(img.scanLine(y)), X);
   }
 
   meta["width"] = X;
