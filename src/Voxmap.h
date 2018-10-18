@@ -11,7 +11,7 @@
 
 class Voxmap {
 public:
-  static constexpr int MAXMVOX = 1000;
+  static constexpr int MAXMVOX = 2000;
 public:
   Voxmap();
   ~Voxmap();
