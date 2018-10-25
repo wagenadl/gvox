@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'MainWindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.9.1
+** Created by: Qt User Interface Compiler version 5.9.5
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -56,6 +56,12 @@ public:
     QAction *actionOLeft;
     QAction *actionODorsal;
     QAction *actionOPosterior;
+    QAction *actionEORight;
+    QAction *actionEOVentral;
+    QAction *actionEOAnterior;
+    QAction *actionEOLeft;
+    QAction *actionEODorsal;
+    QAction *actionEOPosterior;
     QAction *actionExport;
     QAction *actionCopy;
     QAction *actionPRight;
@@ -72,6 +78,7 @@ public:
     QMenu *menuView;
     QMenu *menuProjection;
     QMenu *menuOverlay;
+    QMenu *menuEOverlay;
     QMenu *menuProjection_2;
     QMenu *menuEdit;
     QStatusBar *statusbar;
@@ -161,6 +168,18 @@ public:
         actionODorsal->setObjectName(QStringLiteral("actionODorsal"));
         actionOPosterior = new QAction(MainWindow);
         actionOPosterior->setObjectName(QStringLiteral("actionOPosterior"));
+        actionEORight = new QAction(MainWindow);
+        actionEORight->setObjectName(QStringLiteral("actionEORight"));
+        actionEOVentral = new QAction(MainWindow);
+        actionEOVentral->setObjectName(QStringLiteral("actionEOVentral"));
+        actionEOAnterior = new QAction(MainWindow);
+        actionEOAnterior->setObjectName(QStringLiteral("actionEOAnterior"));
+        actionEOLeft = new QAction(MainWindow);
+        actionEOLeft->setObjectName(QStringLiteral("actionEOLeft"));
+        actionEODorsal = new QAction(MainWindow);
+        actionEODorsal->setObjectName(QStringLiteral("actionEODorsal"));
+        actionEOPosterior = new QAction(MainWindow);
+        actionEOPosterior->setObjectName(QStringLiteral("actionEOPosterior"));
         actionExport = new QAction(MainWindow);
         actionExport->setObjectName(QStringLiteral("actionExport"));
         actionCopy = new QAction(MainWindow);
@@ -195,6 +214,8 @@ public:
         menuProjection->setObjectName(QStringLiteral("menuProjection"));
         menuOverlay = new QMenu(menuView);
         menuOverlay->setObjectName(QStringLiteral("menuOverlay"));
+        menuEOverlay = new QMenu(menuView);
+        menuEOverlay->setObjectName(QStringLiteral("menuEOverlay"));
         menuProjection_2 = new QMenu(menuView);
         menuProjection_2->setObjectName(QStringLiteral("menuProjection_2"));
         menuEdit = new QMenu(menubar);
@@ -427,6 +448,7 @@ public:
         menuView->addAction(menuProjection->menuAction());
         menuView->addAction(menuOverlay->menuAction());
         menuView->addAction(menuProjection_2->menuAction());
+        menuView->addAction(menuEOverlay->menuAction());
         menuProjection->addAction(actionRight);
         menuProjection->addAction(actionVentral);
         menuProjection->addAction(actionAnterior);
@@ -439,6 +461,12 @@ public:
         menuOverlay->addAction(actionOLeft);
         menuOverlay->addAction(actionODorsal);
         menuOverlay->addAction(actionOPosterior);
+        menuEOverlay->addAction(actionEORight);
+        menuEOverlay->addAction(actionEOVentral);
+        menuEOverlay->addAction(actionEOAnterior);
+        menuEOverlay->addAction(actionEOLeft);
+        menuEOverlay->addAction(actionEODorsal);
+        menuEOverlay->addAction(actionEOPosterior);
         menuProjection_2->addAction(actionPRight);
         menuProjection_2->addAction(actionPVentral);
         menuProjection_2->addAction(actionPAnterior);
@@ -474,6 +502,12 @@ public:
         actionOLeft->setText(QApplication::translate("MainWindow", "Left", Q_NULLPTR));
         actionODorsal->setText(QApplication::translate("MainWindow", "Dorsal", Q_NULLPTR));
         actionOPosterior->setText(QApplication::translate("MainWindow", "Posterior", Q_NULLPTR));
+        actionEORight->setText(QApplication::translate("MainWindow", "Right", Q_NULLPTR));
+        actionEOVentral->setText(QApplication::translate("MainWindow", "Ventral", Q_NULLPTR));
+        actionEOAnterior->setText(QApplication::translate("MainWindow", "Anterior", Q_NULLPTR));
+        actionEOLeft->setText(QApplication::translate("MainWindow", "Left", Q_NULLPTR));
+        actionEODorsal->setText(QApplication::translate("MainWindow", "Dorsal", Q_NULLPTR));
+        actionEOPosterior->setText(QApplication::translate("MainWindow", "Posterior", Q_NULLPTR));
         actionExport->setText(QApplication::translate("MainWindow", "Export", Q_NULLPTR));
         actionCopy->setText(QApplication::translate("MainWindow", "Copy image to clipboard", Q_NULLPTR));
         actionPRight->setText(QApplication::translate("MainWindow", "Right", Q_NULLPTR));
@@ -488,6 +522,7 @@ public:
         menuView->setTitle(QApplication::translate("MainWindow", "View", Q_NULLPTR));
         menuProjection->setTitle(QApplication::translate("MainWindow", "Traces", Q_NULLPTR));
         menuOverlay->setTitle(QApplication::translate("MainWindow", "Overlay", Q_NULLPTR));
+        menuEOverlay->setTitle(QApplication::translate("MainWindow", "Exclusive overlay", Q_NULLPTR));
         menuProjection_2->setTitle(QApplication::translate("MainWindow", "Projection", Q_NULLPTR));
         menuEdit->setTitle(QApplication::translate("MainWindow", "Edit", Q_NULLPTR));
         groupBox->setTitle(QApplication::translate("MainWindow", "Mouse action:", Q_NULLPTR));

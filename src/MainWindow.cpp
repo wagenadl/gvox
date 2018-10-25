@@ -93,7 +93,20 @@ MainWindow::MainWindow() {
   connect(ui->actionOPosterior, &QAction::triggered,
           [this]() { ui->viewer->showOverlay(6); });
 
-    connect(ui->actionPRight, &QAction::triggered,
+  connect(ui->actionEORight, &QAction::triggered,
+          [this]() { ui->viewer->showEOverlay(1, ui->pfind->text()); });
+  connect(ui->actionEOVentral, &QAction::triggered,
+          [this]() { ui->viewer->showEOverlay(2, ui->pfind->text()); });
+  connect(ui->actionEOAnterior, &QAction::triggered,
+          [this]() { ui->viewer->showEOverlay(3, ui->pfind->text()); });
+  connect(ui->actionEOLeft, &QAction::triggered,
+          [this]() { ui->viewer->showEOverlay(4, ui->pfind->text()); });
+  connect(ui->actionEODorsal, &QAction::triggered,
+          [this]() { ui->viewer->showEOverlay(5, ui->pfind->text()); });
+  connect(ui->actionEOPosterior, &QAction::triggered,
+          [this]() { ui->viewer->showEOverlay(6, ui->pfind->text()); });
+  
+  connect(ui->actionPRight, &QAction::triggered,
           [this]() { ui->viewer->showProjection(1); });
   connect(ui->actionPVentral, &QAction::triggered,
           [this]() { ui->viewer->showProjection(2); });

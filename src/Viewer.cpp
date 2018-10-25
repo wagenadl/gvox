@@ -17,6 +17,7 @@
 #include <QTimerEvent>
 
 Viewer::Viewer(QWidget *parent): QLabel(parent) {
+  thickmod = 1;
   voxmap = 0;
   idmap = 0;
   view = All;
@@ -106,6 +107,21 @@ void Viewer::showOverlay(int k) {
   QCursor c0 = cursor();
   setCursor(Qt::WaitCursor);
   pviewer[k]->showOverlay(k);
+  setCursor(c0);
+}
+
+void Viewer::showEOverlay(int k, QString name) {
+  ensurePViewer(k+30);
+  QCursor c0 = cursor();
+  setCursor(Qt::WaitCursor);
+  bool ok;
+  int id = name.toInt(&ok);
+  if (!ok)
+    id = voxmap->find(name);
+  if (id>0)
+    pviewer[k+30]->showOverlay(k, id);
+  else
+    qDebug() << "No object “" << name << "” found";
   setCursor(c0);
 }
 
@@ -308,7 +324,10 @@ void Viewer::wheelEvent(QWheelEvent *e) {
     t.scale(exp(-delta.y()/200./hidpi_), pos.x(), pos.y());
     Point3 p1(t.apply(Point3(0,0,0)));
     Point3 p2(t.apply(Point3(100,0,0)));
-    message->setText(QString("Scale: %1%").arg(int(1e4/((p1-p2).length()))));
+    double scl = 1e2/((p1-p2).length());
+    thickmod = scl > 1 ? scl : 1;
+    message->setText(QString("Scale: %1%").arg(int(100*scl)));
+    
   } else if (e->modifiers() & Qt::ShiftModifier
 	     || mode==Select) {
     // wheel + shift: move in Z
@@ -358,6 +377,8 @@ void Viewer::rebuild() {
   }
 }
 
+static constexpr int THICKNESS = 2;
+
 void Viewer::rebuildID() {
   static DistinctColors dc;
   int w = width() / hidpi_;
@@ -373,9 +394,10 @@ void Viewer::rebuildID() {
       auto foo = [&](int y0, int y1) {
         QMap<int, bool> use;
 	uint16_t buf[w];
+	uint16_t buf2[w];
 	for (int y=y0; y<y1; y++) {
 	  uint32_t *bits = (uint32_t*)(img.scanLine(y));
-	  idmap->scanLine(tid, y, w, buf);
+	  idmap->thickScanLine(tid, y, w, THICKNESS*thickmod, buf, buf2);
 	  for (int x=0; x<w; x++) {
             int v = buf[x];
             if (v && !use.contains(v)) {
