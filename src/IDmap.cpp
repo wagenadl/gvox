@@ -116,10 +116,10 @@ void IDmap::save(QString ofn) const {
 void IDmap::thickScanLine(Transform3 const &t, int y, int nx, int thick,
 			  uint16_t *dest, uint16_t *buf) {
   scanLine(t, y, nx, dest, 0);
-  qDebug() << "scanLineDepth";
-  qDebug() << "  " << t.apply(Point3(y, nx/2, -2));
-  qDebug() << "  " << t.apply(Point3(y, nx/2, 0));
-  qDebug() << "  " << t.apply(Point3(y, nx/2, 2));
+  //qDebug() << "scanLineDepth";
+  //qDebug() << "  " << t.apply(Point3(y, nx/2, -2));
+  //qDebug() << "  " << t.apply(Point3(y, nx/2, 0));
+  //qDebug() << "  " << t.apply(Point3(y, nx/2, 2));
   for (int dz=-thick; dz<=thick; dz++) {
     if (dz==0)
       continue;

@@ -209,28 +209,10 @@ void Viewer::showPos(QPoint p) {
 }
 
 void Viewer::showPos(Point3 p) {
-  if (voxmap && voxmap->hasMetaValue("Ainv23")) {
-    double Ainv[4][4];
-    for (int m=0; m<4; m++)
-      for (int n=0; n<4; n++)
-        Ainv[m][n] = voxmap->metaValue(QString("Ainv%1%2").arg(m).arg(n));
-    double s0[3];
-    for (int m=0; m<3; m++)
-      s0[m] = voxmap->metaValue(QString("s0%1").arg(m));
-    double u0[3];
-    for (int m=0; m<3; m++)
-      u0[m] = voxmap->metaValue(QString("u0%1").arg(m));
-    double x0 = p.x/IDFACTOR - u0[0];
-    double y0 = p.y/IDFACTOR - u0[1];
-    double z0 = p.z/IDFACTOR - u0[2];
-    double x = Ainv[0][0]*x0 + Ainv[0][1]*y0 + Ainv[0][2]*z0 + Ainv[0][3];
-    double y = Ainv[1][0]*x0 + Ainv[1][1]*y0 + Ainv[1][2]*z0 + Ainv[1][3];
-    double z = Ainv[2][0]*x0 + Ainv[2][1]*y0 + Ainv[2][2]*z0 + Ainv[2][3];
-    x += s0[0];
-    y += s0[1];
-    z += s0[2];
-    message2->setText(QString("(%1,%2,%3)")
-                      .arg(x, 7, 'f', 2).arg(y, 7, 'f', 2).arg(z, 7, 'f', 2));
+  if (voxmap) {
+    p = voxmap->pixtoum(p);
+    message2->setText(QString("(%1,%2,%3 μm)")
+               .arg(p.x, 7, 'f', 2).arg(p.y, 7, 'f', 2).arg(p.z, 7, 'f', 2));
   } else {
     message2->setText(QString("(%1,%2,%3)")
                       .arg(int(p.x)).arg(int(p.y)).arg(int(p.z)));
@@ -238,6 +220,7 @@ void Viewer::showPos(Point3 p) {
 }
 
 void Viewer::mouseMoveEvent(QMouseEvent *e) {
+  qDebug() << "mousemove" << dragbutton << e->buttons();
   if (dragbutton==Qt::LeftButton && dragmods & Qt::ControlModifier) {
     // control-drag: rotate 3D
     QPoint delta = e->pos() - dragbase;
@@ -322,16 +305,12 @@ void Viewer::mouseDoubleClickEvent(QMouseEvent *e) {
 }
 
 void Viewer::resetRotation() {
-  if (voxmap && voxmap->hasMetaValue("A23")) {
+  if (voxmap) {
     Point3 p0 = t.apply(Point3(width()/2./hidpi_, height()/2./hidpi_));
     double d0 = pow(t.det(), 1/3.);
-    for (int m=0; m<3; m++)
-      for (int n=0; n<3; n++)
-        t.m[m][n] = voxmap->metaValue(QString("A%1%2").arg(m).arg(n));
+    t = voxmap->pixtoumTransform();
     double d1 = pow(t.det(), 1/3.);
-    for (int m=0; m<3; m++)
-      for (int n=0; n<3; n++)
-        t.m[m][n] *= d0/d1;
+    t.scale(d0/d1, 0, 0);
     Point3 p1 = t.apply(Point3(width()/2./hidpi_, height()/2./hidpi_));
     t = Transform3::shifter(p0.x-p1.x, p0.y-p1.y, p0.z-p1.z) * t;
     rebuild();
@@ -341,27 +320,8 @@ void Viewer::resetRotation() {
 void Viewer::gotoXYZum(double x, double y, double z) {
   Point3 p1 = t.apply(Point3(width()/2./hidpi_, height()/2./hidpi_));
   Point3 p0(x, y, z);
-  if (voxmap && voxmap->hasMetaValue("A23")) {
-    double A[4][4];
-    for (int m=0; m<4; m++)
-      for (int n=0; n<4; n++)
-        A[m][n] = voxmap->metaValue(QString("A%1%2").arg(m).arg(n));
-    double s0[3];
-    for (int m=0; m<3; m++)
-      s0[m] = voxmap->metaValue(QString("s0%1").arg(m));
-    double u0[3];
-    for (int m=0; m<3; m++)
-      u0[m] = voxmap->metaValue(QString("u0%1").arg(m));
-    x -= s0[0];
-    y -= s0[1];
-    z -= s0[2];
-    double x1 = A[0][0]*x + A[0][1]*y + A[0][2]*z + A[0][3];
-    double y1 = A[1][0]*x + A[1][1]*y + A[1][2]*z + A[0][3];
-    double z1 = A[2][0]*x + A[2][1]*y + A[2][2]*z + A[0][3];
-    p0.x = (x1 + u0[0])*IDFACTOR;
-    p0.y = (y1 + u0[1])*IDFACTOR;
-    p0.z = (z1 + u0[2])*IDFACTOR;
-  }
+  if (voxmap)
+    p0 = voxmap->umtopix(p0);
   t = Transform3::shifter(p0.x-p1.x, p0.y-p1.y, p0.z-p1.z) * t;
   rebuild();
 }
@@ -370,6 +330,7 @@ void Viewer::mousePressEvent(QMouseEvent *e) {
   t0 = t;
   dragbase = e->pos();
   dragbutton = e->button();
+  qDebug() << "mousepress" << dragbutton;
   dragmods = e->modifiers();
   if (dragbutton==Qt::RightButton || mode==Select) {
     Point3 p(tid.apply(Point3(e->pos().x()*1./hidpi_,
@@ -383,6 +344,7 @@ void Viewer::mousePressEvent(QMouseEvent *e) {
 
 void Viewer::mouseReleaseEvent(QMouseEvent *) {
   dragbutton = Qt::NoButton;
+  qDebug() << "mouserelease";
 }
 
 void Viewer::wheelEvent(QWheelEvent *e) {

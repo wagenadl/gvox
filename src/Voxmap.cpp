@@ -396,3 +396,11 @@ double Voxmap::metaValue(QString name) const {
 bool Voxmap::hasMetaValue(QString name) const {
   return meta.contains(name);
 }
+
+Point3 Voxmap::umtopix(Point3 p) const {
+  return um2px.apply(p);
+}
+
+Point3 Voxmap::pixtoum(Point3 p) const {
+  return px2um.apply(p);
+}
