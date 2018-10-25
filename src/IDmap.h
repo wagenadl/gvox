@@ -10,7 +10,7 @@
 #include <QVector>
 
 class IDmap: public QObject {
-  static constexpr int MAXMVOX = 1000;
+  static constexpr int MAXMVOX = 2000;
 public:
   IDmap(int X, int Y, int Z);
   ~IDmap();
