@@ -3,6 +3,7 @@
 #include "Viewer.h"
 #include "Voxmap.h"
 #include "IDmap.h"
+#include "IDFactor.h"
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QDebug>
@@ -25,6 +26,7 @@ Viewer::Viewer(QWidget *parent): QLabel(parent) {
   setScaledContents(false);
   setMouseTracking(true);
   setFocusPolicy(Qt::WheelFocus);
+  setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
   dragbutton = Qt::NoButton;
   message = new QLabel(this);
   message2 = new QLabel(this);
@@ -191,8 +193,32 @@ void Viewer::showPos(QPoint p) {
 }
 
 void Viewer::showPos(Point3 p) {
-  message2->setText(QString("(%1,%2,%3)")
+  if (voxmap && voxmap->hasMetaValue("Ainv23")) {
+    double Ainv[4][4];
+    for (int m=0; m<4; m++)
+      for (int n=0; n<4; n++)
+        Ainv[m][n] = voxmap->metaValue(QString("Ainv%1%2").arg(m).arg(n));
+    double s0[3];
+    for (int m=0; m<3; m++)
+      s0[m] = voxmap->metaValue(QString("s0%1").arg(m));
+    double u0[3];
+    for (int m=0; m<3; m++)
+      u0[m] = voxmap->metaValue(QString("u0%1").arg(m));
+    double x0 = p.x/IDFACTOR - u0[0];
+    double y0 = p.y/IDFACTOR - u0[1];
+    double z0 = p.z/IDFACTOR - u0[2];
+    double x = Ainv[0][0]*x0 + Ainv[0][1]*y0 + Ainv[0][2]*z0 + Ainv[0][3];
+    double y = Ainv[1][0]*x0 + Ainv[1][1]*y0 + Ainv[1][2]*z0 + Ainv[1][3];
+    double z = Ainv[2][0]*x0 + Ainv[2][1]*y0 + Ainv[2][2]*z0 + Ainv[2][3];
+    x += s0[0];
+    y += s0[1];
+    z += s0[2];
+    message2->setText(QString("(%1,%2,%3)")
+                      .arg(x, 7, 'f', 2).arg(y, 7, 'f', 2).arg(z, 7, 'f', 2));
+  } else {
+    message2->setText(QString("(%1,%2,%3)")
                       .arg(int(p.x)).arg(int(p.y)).arg(int(p.z)));
+  }
 }
 
 void Viewer::mouseMoveEvent(QMouseEvent *e) {
@@ -278,7 +304,51 @@ void Viewer::mouseDoubleClickEvent(QMouseEvent *e) {
     emit selectionChanged(paintid);
   }
 }
-    
+
+void Viewer::resetRotation() {
+  if (voxmap && voxmap->hasMetaValue("A23")) {
+    Point3 p0 = t.apply(Point3(width()/2./hidpi_, height()/2./hidpi_));
+    double d0 = pow(t.det(), 1/3.);
+    for (int m=0; m<3; m++)
+      for (int n=0; n<3; n++)
+        t.m[m][n] = voxmap->metaValue(QString("A%1%2").arg(m).arg(n));
+    double d1 = pow(t.det(), 1/3.);
+    for (int m=0; m<3; m++)
+      for (int n=0; n<3; n++)
+        t.m[m][n] *= d0/d1;
+    Point3 p1 = t.apply(Point3(width()/2./hidpi_, height()/2./hidpi_));
+    t = Transform3::shifter(p0.x-p1.x, p0.y-p1.y, p0.z-p1.z) * t;
+    rebuild();
+  }    
+}
+
+void Viewer::gotoXYZum(double x, double y, double z) {
+  Point3 p1 = t.apply(Point3(width()/2./hidpi_, height()/2./hidpi_));
+  Point3 p0(x, y, z);
+  if (voxmap && voxmap->hasMetaValue("A23")) {
+    double A[4][4];
+    for (int m=0; m<4; m++)
+      for (int n=0; n<4; n++)
+        A[m][n] = voxmap->metaValue(QString("A%1%2").arg(m).arg(n));
+    double s0[3];
+    for (int m=0; m<3; m++)
+      s0[m] = voxmap->metaValue(QString("s0%1").arg(m));
+    double u0[3];
+    for (int m=0; m<3; m++)
+      u0[m] = voxmap->metaValue(QString("u0%1").arg(m));
+    x -= s0[0];
+    y -= s0[1];
+    z -= s0[2];
+    double x1 = A[0][0]*x + A[0][1]*y + A[0][2]*z + A[0][3];
+    double y1 = A[1][0]*x + A[1][1]*y + A[1][2]*z + A[0][3];
+    double z1 = A[2][0]*x + A[2][1]*y + A[2][2]*z + A[0][3];
+    p0.x = (x1 + u0[0])*IDFACTOR;
+    p0.y = (y1 + u0[1])*IDFACTOR;
+    p0.z = (z1 + u0[2])*IDFACTOR;
+  }
+  t = Transform3::shifter(p0.x-p1.x, p0.y-p1.y, p0.z-p1.z) * t;
+  rebuild();
+}
 
 void Viewer::mousePressEvent(QMouseEvent *e) {
   t0 = t;
@@ -318,12 +388,29 @@ void Viewer::wheelEvent(QWheelEvent *e) {
   rebuild();
 }
 
-void Viewer::resizeEvent(QResizeEvent *) {
+void Viewer::resizeEvent(QResizeEvent *e) {
+  QSize o = e->oldSize();
+  QSize n = e->size();
+  Point3 p0(t.apply(Point3(o.width()/2./hidpi_, o.height()/2./hidpi_,0)));
   rebuild();
+  Point3 p1(t.apply(Point3(n.width()/2./hidpi_, n.height()/2./hidpi_,0)));
+  t = Transform3::shifter(p0.x-p1.x, p0.y-p1.y, p0.z-p1.z) * t;
+  
   message->move(5, height() - 50);
   message->resize(width()-10, 35);
   message2->move(5, height() - 50);
   message2->resize(width()-10, 35);
+}
+
+void Viewer::gotoCenter() {
+  if (voxmap) {
+    t = Transform3();
+    t.m[0][3] = voxmap->width()/2 - width()/2./hidpi_;
+    t.m[1][3] = voxmap->height()/2 - height()/2./hidpi_;
+    t.m[2][3] = voxmap->depth()/2;
+  } else {
+    qDebug() << "Cannot center - no voxmap";
+  }
 }
 
 void Viewer::rebuild() {
@@ -578,3 +665,4 @@ void Viewer::doExport() {
       message->setText("Exported to " + ofn);
   }
 }  
+

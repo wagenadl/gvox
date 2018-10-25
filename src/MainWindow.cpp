@@ -9,9 +9,26 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QInputDialog>
 #include "ui_MainWindow.h"
+#include "IDFactor.h"
 
-constexpr int IDFACTOR = 2;
+void gotoXYZDialog(Viewer *v) {
+  QString xyz = QInputDialog::getText(0, "Goto position", "X, Y, Z (μm):");
+  QRegularExpression re("^ *([-0-9.]+) *, *([-0-9.]+) *, *([-0-9.]+) *$");
+  auto mtch = re.match(xyz);
+  if (mtch.hasMatch()) {
+    double x = mtch.captured(1).toDouble();
+    double y = mtch.captured(2).toDouble();
+    double z = mtch.captured(3).toDouble();
+    qDebug() << x << y << z;
+    v->gotoXYZum(x, y, z);
+  } else {
+    QMessageBox::information(0, "gvox", "Cannot interpret position request");
+  }
+}
+    
+  
 
 void showDocs() {
   QFile f(":/README.txt");
@@ -93,7 +110,7 @@ MainWindow::MainWindow() {
   connect(ui->actionOPosterior, &QAction::triggered,
           [this]() { ui->viewer->showOverlay(6); });
 
-    connect(ui->actionPRight, &QAction::triggered,
+  connect(ui->actionPRight, &QAction::triggered,
           [this]() { ui->viewer->showProjection(1); });
   connect(ui->actionPVentral, &QAction::triggered,
           [this]() { ui->viewer->showProjection(2); });
@@ -105,6 +122,13 @@ MainWindow::MainWindow() {
           [this]() { ui->viewer->showProjection(5); });
   connect(ui->actionPPosterior, &QAction::triggered,
           [this]() { ui->viewer->showProjection(6); });
+
+  connect(ui->actionResetRotation, &QAction::triggered,
+          [this]() { ui->viewer->resetRotation(); });
+  ui->actionResetRotation->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_0));
+  connect(ui->actionGotoXYZ, &QAction::triggered,
+          [this]() { gotoXYZDialog(ui->viewer); });
+  ui->actionGotoXYZ->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_G));
 
   connect(ui->actionAbout, &QAction::triggered,
           []() { showAbout(); });
@@ -221,6 +245,8 @@ void MainWindow::doLoad() {
 
   ui->viewer->setVoxmap(voxmap);
   ui->viewer->setIDmap(idmap, IDFACTOR);
+  ui->viewer->gotoCenter();
+  ui->viewer->resetRotation();
 }
   
 void MainWindow::findDialog() {

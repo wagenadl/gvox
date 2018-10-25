@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'MainWindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.9.1
+** Created by: Qt User Interface Compiler version 5.9.5
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -65,6 +65,8 @@ public:
     QAction *actionPDorsal;
     QAction *actionPPosterior;
     QAction *actionImport;
+    QAction *actionResetRotation;
+    QAction *actionGotoXYZ;
     Viewer *viewer;
     QMenuBar *menubar;
     QMenu *menuFile;
@@ -122,7 +124,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(1237, 1274);
+        MainWindow->resize(896, 590);
         actionOpen = new QAction(MainWindow);
         actionOpen->setObjectName(QStringLiteral("actionOpen"));
         actionQuit = new QAction(MainWindow);
@@ -179,12 +181,16 @@ public:
         actionPPosterior->setObjectName(QStringLiteral("actionPPosterior"));
         actionImport = new QAction(MainWindow);
         actionImport->setObjectName(QStringLiteral("actionImport"));
+        actionResetRotation = new QAction(MainWindow);
+        actionResetRotation->setObjectName(QStringLiteral("actionResetRotation"));
+        actionGotoXYZ = new QAction(MainWindow);
+        actionGotoXYZ->setObjectName(QStringLiteral("actionGotoXYZ"));
         viewer = new Viewer(MainWindow);
         viewer->setObjectName(QStringLiteral("viewer"));
         MainWindow->setCentralWidget(viewer);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QStringLiteral("menubar"));
-        menubar->setGeometry(QRect(0, 0, 1237, 39));
+        menubar->setGeometry(QRect(0, 0, 896, 23));
         menuFile = new QMenu(menubar);
         menuFile->setObjectName(QStringLiteral("menuFile"));
         menuHelp = new QMenu(menubar);
@@ -427,6 +433,8 @@ public:
         menuView->addAction(menuProjection->menuAction());
         menuView->addAction(menuOverlay->menuAction());
         menuView->addAction(menuProjection_2->menuAction());
+        menuView->addAction(actionResetRotation);
+        menuView->addAction(actionGotoXYZ);
         menuProjection->addAction(actionRight);
         menuProjection->addAction(actionVentral);
         menuProjection->addAction(actionAnterior);
@@ -455,8 +463,8 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", Q_NULLPTR));
-        actionOpen->setText(QApplication::translate("MainWindow", "Open...", Q_NULLPTR));
-        actionQuit->setText(QApplication::translate("MainWindow", "Quit", Q_NULLPTR));
+        actionOpen->setText(QApplication::translate("MainWindow", "&Open...", Q_NULLPTR));
+        actionQuit->setText(QApplication::translate("MainWindow", "&Quit", Q_NULLPTR));
         actionDraw_new_object->setText(QApplication::translate("MainWindow", "Draw new object", Q_NULLPTR));
         actionDelete_object->setText(QApplication::translate("MainWindow", "Delete object", Q_NULLPTR));
         actionSelect_object->setText(QApplication::translate("MainWindow", "Select object", Q_NULLPTR));
@@ -474,22 +482,24 @@ public:
         actionOLeft->setText(QApplication::translate("MainWindow", "Left", Q_NULLPTR));
         actionODorsal->setText(QApplication::translate("MainWindow", "Dorsal", Q_NULLPTR));
         actionOPosterior->setText(QApplication::translate("MainWindow", "Posterior", Q_NULLPTR));
-        actionExport->setText(QApplication::translate("MainWindow", "Export", Q_NULLPTR));
-        actionCopy->setText(QApplication::translate("MainWindow", "Copy image to clipboard", Q_NULLPTR));
+        actionExport->setText(QApplication::translate("MainWindow", "&Export", Q_NULLPTR));
+        actionCopy->setText(QApplication::translate("MainWindow", "&Copy image to clipboard", Q_NULLPTR));
         actionPRight->setText(QApplication::translate("MainWindow", "Right", Q_NULLPTR));
         actionPVentral->setText(QApplication::translate("MainWindow", "Ventral", Q_NULLPTR));
         actionPAnterior->setText(QApplication::translate("MainWindow", "Anterior", Q_NULLPTR));
         actionPLeft->setText(QApplication::translate("MainWindow", "Left", Q_NULLPTR));
         actionPDorsal->setText(QApplication::translate("MainWindow", "Dorsal", Q_NULLPTR));
         actionPPosterior->setText(QApplication::translate("MainWindow", "Posterior", Q_NULLPTR));
-        actionImport->setText(QApplication::translate("MainWindow", "Import...", Q_NULLPTR));
-        menuFile->setTitle(QApplication::translate("MainWindow", "File", Q_NULLPTR));
+        actionImport->setText(QApplication::translate("MainWindow", "&Import...", Q_NULLPTR));
+        actionResetRotation->setText(QApplication::translate("MainWindow", "&Reset rotation", Q_NULLPTR));
+        actionGotoXYZ->setText(QApplication::translate("MainWindow", "&Go to x,y,z", Q_NULLPTR));
+        menuFile->setTitle(QApplication::translate("MainWindow", "&File", Q_NULLPTR));
         menuHelp->setTitle(QApplication::translate("MainWindow", "Help", Q_NULLPTR));
-        menuView->setTitle(QApplication::translate("MainWindow", "View", Q_NULLPTR));
-        menuProjection->setTitle(QApplication::translate("MainWindow", "Traces", Q_NULLPTR));
-        menuOverlay->setTitle(QApplication::translate("MainWindow", "Overlay", Q_NULLPTR));
-        menuProjection_2->setTitle(QApplication::translate("MainWindow", "Projection", Q_NULLPTR));
-        menuEdit->setTitle(QApplication::translate("MainWindow", "Edit", Q_NULLPTR));
+        menuView->setTitle(QApplication::translate("MainWindow", "&View", Q_NULLPTR));
+        menuProjection->setTitle(QApplication::translate("MainWindow", "&Traces", Q_NULLPTR));
+        menuOverlay->setTitle(QApplication::translate("MainWindow", "&Overlay", Q_NULLPTR));
+        menuProjection_2->setTitle(QApplication::translate("MainWindow", "&Projection", Q_NULLPTR));
+        menuEdit->setTitle(QApplication::translate("MainWindow", "&Edit", Q_NULLPTR));
         groupBox->setTitle(QApplication::translate("MainWindow", "Mouse action:", Q_NULLPTR));
         select->setText(QApplication::translate("MainWindow", "Select object", Q_NULLPTR));
         add->setText(QApplication::translate("MainWindow", "Add to object", Q_NULLPTR));

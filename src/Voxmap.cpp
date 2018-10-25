@@ -379,3 +379,11 @@ QString Voxmap::basename() const {
 QString Voxmap::label(QString ax) const {
   return meta["label-" + ax].toString();
 }
+
+double Voxmap::metaValue(QString name) const {
+  return meta[name].toDouble();
+}
+
+bool Voxmap::hasMetaValue(QString name) const {
+  return meta.contains(name);
+}

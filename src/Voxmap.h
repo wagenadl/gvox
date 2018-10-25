@@ -23,6 +23,8 @@ public:
   QString name(int id) const;
   void setName(int id, QString n);
   int find(QString name) const;
+  double metaValue(QString jsonname) const;
+  bool hasMetaValue(QString jsonname) const;
 public:
   QString basename() const;
   int width() const { return X; }

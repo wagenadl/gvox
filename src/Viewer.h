@@ -41,6 +41,9 @@ public slots:
   void find(int id);
   bool find(QString name);
   void buildLUT(uint8_t blk=0, uint8_t wht=255, float gamma=1);
+  void gotoCenter();
+  void gotoXYZum(double x, double y, double z);
+  void resetRotation();
 signals:
   void selectionChanged(int);
 protected:
