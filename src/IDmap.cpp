@@ -113,10 +113,27 @@ void IDmap::save(QString ofn) const {
   }
 }
 
+void IDmap::thickScanLine(Transform3 const &t, int y, int nx, int thick,
+			  uint16_t *dest, uint16_t *buf) {
+  scanLine(t, y, nx, dest, 0);
+  //qDebug() << "scanLineDepth";
+  //qDebug() << "  " << t.apply(Point3(y, nx/2, -2));
+  //qDebug() << "  " << t.apply(Point3(y, nx/2, 0));
+  //qDebug() << "  " << t.apply(Point3(y, nx/2, 2));
+  for (int dz=-thick; dz<=thick; dz++) {
+    if (dz==0)
+      continue;
+    scanLine(t, y, nx, buf, dz);
+    for (int x=0; x<nx; x++)
+      if (buf[x]>0 && dest[x]==0)
+	dest[x] = buf[x];
+  }
+}
+
 void IDmap::scanLine(Transform3 const &t, int y, int nx,
-                      uint16_t *dest) {
-  Point3 p0 = t.apply(Point3(0, y, 0));
-  Point3 p1 = t.apply(Point3(nx-1, y, 0));
+		     uint16_t *dest, int dz1) {
+  Point3 p0 = t.apply(Point3(0, y, dz1));
+  Point3 p1 = t.apply(Point3(nx-1, y, dz1));
   float x0 = p0.x + .5;
   float y0 = p0.y + .5;
   float z0 = p0.z + .5;

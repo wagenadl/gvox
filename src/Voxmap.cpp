@@ -43,6 +43,8 @@ void Voxmap::clear() {
   delete [] data;
   data = 0;
   meta = QJsonObject();
+  um2px = Transform3();
+  px2um = Transform3();
 }  
 
 bool Voxmap::importDir(QString source, QString outbase) {
@@ -77,7 +79,9 @@ bool Voxmap::importDir(QString source, QString outbase) {
       clear();
       return false;
     }
-    memcpy((void*)(data + z*zstride), (void const *)(img.bits()), X*Y);
+    for (int y=0; y<Y; y++)
+      memcpy((void*)(data + z*zstride + y*X),
+             (void const *)(img.scanLine(y)), X);
   }
 
   meta["width"] = X;
@@ -218,6 +222,13 @@ bool Voxmap::loadFromJson(QString jsonfn) {
     qDebug() << "Could not read data";
     clear();
     return false;
+  }
+
+  if (meta.contains("A23")) {
+    for (int m=0; m<3; m++)
+      for (int n=0; n<4; n++)
+	um2px.m[m][n] = meta[QString("A%1%2").arg(m).arg(n)].toDouble();
+    px2um = um2px.inverse();
   }
   return true;
 }
@@ -376,4 +387,20 @@ QString Voxmap::basename() const {
 
 QString Voxmap::label(QString ax) const {
   return meta["label-" + ax].toString();
+}
+
+double Voxmap::metaValue(QString name) const {
+  return meta[name].toDouble();
+}
+
+bool Voxmap::hasMetaValue(QString name) const {
+  return meta.contains(name);
+}
+
+Point3 Voxmap::umtopix(Point3 p) const {
+  return um2px.apply(p);
+}
+
+Point3 Voxmap::pixtoum(Point3 p) const {
+  return px2um.apply(p);
 }

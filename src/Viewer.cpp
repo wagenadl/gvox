@@ -3,6 +3,7 @@
 #include "Viewer.h"
 #include "Voxmap.h"
 #include "IDmap.h"
+#include "IDFactor.h"
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QDebug>
@@ -17,6 +18,7 @@
 #include <QTimerEvent>
 
 Viewer::Viewer(QWidget *parent): QLabel(parent) {
+  thickmod = 1;
   voxmap = 0;
   idmap = 0;
   view = All;
@@ -25,6 +27,7 @@ Viewer::Viewer(QWidget *parent): QLabel(parent) {
   setScaledContents(false);
   setMouseTracking(true);
   setFocusPolicy(Qt::WheelFocus);
+  setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
   dragbutton = Qt::NoButton;
   message = new QLabel(this);
   message2 = new QLabel(this);
@@ -106,6 +109,21 @@ void Viewer::showOverlay(int k) {
   QCursor c0 = cursor();
   setCursor(Qt::WaitCursor);
   pviewer[k]->showOverlay(k);
+  setCursor(c0);
+}
+
+void Viewer::showEOverlay(int k, QString name) {
+  ensurePViewer(k+30);
+  QCursor c0 = cursor();
+  setCursor(Qt::WaitCursor);
+  bool ok;
+  int id = name.toInt(&ok);
+  if (!ok)
+    id = voxmap->find(name);
+  if (id>0)
+    pviewer[k+30]->showOverlay(k, id);
+  else
+    qDebug() << "No object “" << name << "” found";
   setCursor(c0);
 }
 
@@ -191,11 +209,18 @@ void Viewer::showPos(QPoint p) {
 }
 
 void Viewer::showPos(Point3 p) {
-  message2->setText(QString("(%1,%2,%3)")
+  if (voxmap) {
+    p = voxmap->pixtoum(p);
+    message2->setText(QString("(%1,%2,%3 μm)")
+               .arg(p.x, 7, 'f', 2).arg(p.y, 7, 'f', 2).arg(p.z, 7, 'f', 2));
+  } else {
+    message2->setText(QString("(%1,%2,%3)")
                       .arg(int(p.x)).arg(int(p.y)).arg(int(p.z)));
+  }
 }
 
 void Viewer::mouseMoveEvent(QMouseEvent *e) {
+  qDebug() << "mousemove" << dragbutton << e->buttons();
   if (dragbutton==Qt::LeftButton && dragmods & Qt::ControlModifier) {
     // control-drag: rotate 3D
     QPoint delta = e->pos() - dragbase;
@@ -278,12 +303,34 @@ void Viewer::mouseDoubleClickEvent(QMouseEvent *e) {
     emit selectionChanged(paintid);
   }
 }
-    
+
+void Viewer::resetRotation() {
+  if (voxmap) {
+    Point3 p0 = t.apply(Point3(width()/2./hidpi_, height()/2./hidpi_));
+    double d0 = pow(t.det(), 1/3.);
+    t = voxmap->pixtoumTransform();
+    double d1 = pow(t.det(), 1/3.);
+    t.scale(d0/d1, 0, 0);
+    Point3 p1 = t.apply(Point3(width()/2./hidpi_, height()/2./hidpi_));
+    t = Transform3::shifter(p0.x-p1.x, p0.y-p1.y, p0.z-p1.z) * t;
+    rebuild();
+  }    
+}
+
+void Viewer::gotoXYZum(double x, double y, double z) {
+  Point3 p1 = t.apply(Point3(width()/2./hidpi_, height()/2./hidpi_));
+  Point3 p0(x, y, z);
+  if (voxmap)
+    p0 = voxmap->umtopix(p0);
+  t = Transform3::shifter(p0.x-p1.x, p0.y-p1.y, p0.z-p1.z) * t;
+  rebuild();
+}
 
 void Viewer::mousePressEvent(QMouseEvent *e) {
   t0 = t;
   dragbase = e->pos();
   dragbutton = e->button();
+  qDebug() << "mousepress" << dragbutton;
   dragmods = e->modifiers();
   if (dragbutton==Qt::RightButton || mode==Select) {
     Point3 p(tid.apply(Point3(e->pos().x()*1./hidpi_,
@@ -297,6 +344,7 @@ void Viewer::mousePressEvent(QMouseEvent *e) {
 
 void Viewer::mouseReleaseEvent(QMouseEvent *) {
   dragbutton = Qt::NoButton;
+  qDebug() << "mouserelease";
 }
 
 void Viewer::wheelEvent(QWheelEvent *e) {
@@ -308,7 +356,10 @@ void Viewer::wheelEvent(QWheelEvent *e) {
     t.scale(exp(-delta.y()/200./hidpi_), pos.x(), pos.y());
     Point3 p1(t.apply(Point3(0,0,0)));
     Point3 p2(t.apply(Point3(100,0,0)));
-    message->setText(QString("Scale: %1%").arg(int(1e4/((p1-p2).length()))));
+    double scl = 1e2/((p1-p2).length());
+    thickmod = scl > 1 ? scl : 1;
+    message->setText(QString("Scale: %1%").arg(int(100*scl)));
+    
   } else if (e->modifiers() & Qt::ShiftModifier
 	     || mode==Select) {
     // wheel + shift: move in Z
@@ -318,12 +369,29 @@ void Viewer::wheelEvent(QWheelEvent *e) {
   rebuild();
 }
 
-void Viewer::resizeEvent(QResizeEvent *) {
+void Viewer::resizeEvent(QResizeEvent *e) {
+  QSize o = e->oldSize();
+  QSize n = e->size();
+  Point3 p0(t.apply(Point3(o.width()/2./hidpi_, o.height()/2./hidpi_,0)));
   rebuild();
+  Point3 p1(t.apply(Point3(n.width()/2./hidpi_, n.height()/2./hidpi_,0)));
+  t = Transform3::shifter(p0.x-p1.x, p0.y-p1.y, p0.z-p1.z) * t;
+  
   message->move(5, height() - 50);
   message->resize(width()-10, 35);
   message2->move(5, height() - 50);
   message2->resize(width()-10, 35);
+}
+
+void Viewer::gotoCenter() {
+  if (voxmap) {
+    t = Transform3();
+    t.m[0][3] = voxmap->width()/2 - width()/2./hidpi_;
+    t.m[1][3] = voxmap->height()/2 - height()/2./hidpi_;
+    t.m[2][3] = voxmap->depth()/2;
+  } else {
+    qDebug() << "Cannot center - no voxmap";
+  }
 }
 
 void Viewer::rebuild() {
@@ -358,6 +426,8 @@ void Viewer::rebuild() {
   }
 }
 
+static constexpr int THICKNESS = 2;
+
 void Viewer::rebuildID() {
   static DistinctColors dc;
   int w = width() / hidpi_;
@@ -373,9 +443,10 @@ void Viewer::rebuildID() {
       auto foo = [&](int y0, int y1) {
         QMap<int, bool> use;
 	uint16_t buf[w];
+	uint16_t buf2[w];
 	for (int y=y0; y<y1; y++) {
 	  uint32_t *bits = (uint32_t*)(img.scanLine(y));
-	  idmap->scanLine(tid, y, w, buf);
+	  idmap->thickScanLine(tid, y, w, THICKNESS*thickmod, buf, buf2);
 	  for (int x=0; x<w; x++) {
             int v = buf[x];
             if (v && !use.contains(v)) {
@@ -578,3 +649,4 @@ void Viewer::doExport() {
       message->setText("Exported to " + ofn);
   }
 }  
+

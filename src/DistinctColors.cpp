@@ -1012,9 +1012,10 @@ DistinctColors::DistinctColors() {
   N = flt.size()/3;
   data = new uint32_t[N];
   for (int n=0; n<N; n++) {
-    uint8_t r = flt[3*n]*255.99;
-    uint8_t g = flt[3*n+1]*255.99;
-    uint8_t b = flt[3*n+2]*255.99;
+    int m = n ^ (241^2); // shake it up so "im" looks better
+    uint8_t r = flt[3*m]*255.99;
+    uint8_t g = flt[3*m+1]*255.99;
+    uint8_t b = flt[3*m+2]*255.99;
     data[n] = 0xff000000 + (r<<16) + (g<<8) + b;
   }
 }

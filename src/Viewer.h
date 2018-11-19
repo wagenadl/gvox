@@ -31,9 +31,10 @@ public slots:
   void setMode(Mode);
   void setName(QString);
   void doExport();
-  void showOverlay(int);
-  void showProjection(int);
-  void showTraces(int);
+  void showEOverlay(int side, QString id);
+  void showOverlay(int side);
+  void showProjection(int side);
+  void showTraces(int side);
   void copy();
   void add();
   void del();
@@ -41,6 +42,9 @@ public slots:
   void find(int id);
   bool find(QString name);
   void buildLUT(uint8_t blk=0, uint8_t wht=255, float gamma=1);
+  void gotoCenter();
+  void gotoXYZum(double x, double y, double z);
+  void resetRotation();
 signals:
   void selectionChanged(int);
 protected:
@@ -84,6 +88,7 @@ private:
   Mode mode;
   View view;
   bool showcross;
+  double thickmod;
 };
 
 #endif

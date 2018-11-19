@@ -25,10 +25,11 @@ public:
   void scale(float s, float x0, float y0);
   void report() const;
   Transform3 inverse() const;
+  double det() const;
 public:
   static Transform3 shifter(float dx, float dy, float dz);
-  static Transform3 xrotator(float dxz);
-  static Transform3 yrotator(float dyz);
+  static Transform3 yrotator(float dxz);
+  static Transform3 xrotator(float dyz);
   static Transform3 zrotator(float dxy);
   static Transform3 scaler(float s);
 public:
@@ -36,5 +37,7 @@ public:
 };
 
 Transform3 operator*(Transform3 const &l, Transform3 const &r);
+
+QDebug operator<<(QDebug, Transform3 const &);
 
 #endif

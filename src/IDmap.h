@@ -10,7 +10,7 @@
 #include <QVector>
 
 class IDmap: public QObject {
-  static constexpr int MAXMVOX = 1000;
+  static constexpr int MAXMVOX = 2000;
 public:
   IDmap(int X, int Y, int Z);
   ~IDmap();
@@ -43,7 +43,9 @@ public:
     shouldsave = true;
   }
   void clear();
-  void scanLine(Transform3 const &t, int y, int nx, uint16_t *dest);
+  void scanLine(Transform3 const &t, int y, int nx, uint16_t *dest, int dz=0);
+  void thickScanLine(Transform3 const &t, int y, int nx, int thk,
+		     uint16_t *dst, uint16_t *buf);
   void nearestNonZero(int &x, int &y, int &z) const;
   int width() const { return X; }
   int height() const { return Y; }

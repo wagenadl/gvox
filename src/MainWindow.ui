@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1237</width>
-    <height>1274</height>
+    <width>896</width>
+    <height>590</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,13 +19,13 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1237</width>
-     <height>39</height>
+     <width>896</width>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="actionImport"/>
     <addaction name="actionOpen"/>
@@ -41,11 +41,11 @@
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
-     <string>View</string>
+     <string>&amp;View</string>
     </property>
     <widget class="QMenu" name="menuProjection">
      <property name="title">
-      <string>Traces</string>
+      <string>&amp;Traces</string>
      </property>
      <addaction name="actionRight"/>
      <addaction name="actionVentral"/>
@@ -56,7 +56,7 @@
     </widget>
     <widget class="QMenu" name="menuOverlay">
      <property name="title">
-      <string>Overlay</string>
+      <string>&amp;Overlay</string>
      </property>
      <addaction name="actionORight"/>
      <addaction name="actionOVentral"/>
@@ -65,9 +65,20 @@
      <addaction name="actionODorsal"/>
      <addaction name="actionOPosterior"/>
     </widget>
+    <widget class="QMenu" name="menuEOverlay">
+     <property name="title">
+      <string>Exclusive overlay</string>
+     </property>
+     <addaction name="actionEORight"/>
+     <addaction name="actionEOVentral"/>
+     <addaction name="actionEOAnterior"/>
+     <addaction name="actionEOLeft"/>
+     <addaction name="actionEODorsal"/>
+     <addaction name="actionEOPosterior"/>
+    </widget>
     <widget class="QMenu" name="menuProjection_2">
      <property name="title">
-      <string>Projection</string>
+      <string>&amp;Projection</string>
      </property>
      <addaction name="actionPRight"/>
      <addaction name="actionPVentral"/>
@@ -79,10 +90,13 @@
     <addaction name="menuProjection"/>
     <addaction name="menuOverlay"/>
     <addaction name="menuProjection_2"/>
+    <addaction name="menuEOverlay"/>
+    <addaction name="actionResetRotation"/>
+    <addaction name="actionGotoXYZ"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
-     <string>Edit</string>
+     <string>&amp;Edit</string>
     </property>
     <addaction name="actionCopy"/>
    </widget>
@@ -459,12 +473,12 @@
   </widget>
   <action name="actionOpen">
    <property name="text">
-    <string>Open...</string>
+    <string>&amp;Open...</string>
    </property>
   </action>
   <action name="actionQuit">
    <property name="text">
-    <string>Quit</string>
+    <string>&amp;Quit</string>
    </property>
   </action>
   <action name="actionDraw_new_object">
@@ -552,14 +566,44 @@
     <string>Posterior</string>
    </property>
   </action>
+  <action name="actionEORight">
+   <property name="text">
+    <string>Right</string>
+   </property>
+  </action>
+  <action name="actionEOVentral">
+   <property name="text">
+    <string>Ventral</string>
+   </property>
+  </action>
+  <action name="actionEOAnterior">
+   <property name="text">
+    <string>Anterior</string>
+   </property>
+  </action>
+  <action name="actionEOLeft">
+   <property name="text">
+    <string>Left</string>
+   </property>
+  </action>
+  <action name="actionEODorsal">
+   <property name="text">
+    <string>Dorsal</string>
+   </property>
+  </action>
+  <action name="actionEOPosterior">
+   <property name="text">
+    <string>Posterior</string>
+   </property>
+  </action>
   <action name="actionExport">
    <property name="text">
-    <string>Export</string>
+    <string>&amp;Export</string>
    </property>
   </action>
   <action name="actionCopy">
    <property name="text">
-    <string>Copy image to clipboard</string>
+    <string>&amp;Copy image to clipboard</string>
    </property>
   </action>
   <action name="actionPRight">
@@ -594,7 +638,17 @@
   </action>
   <action name="actionImport">
    <property name="text">
-    <string>Import...</string>
+    <string>&amp;Import...</string>
+   </property>
+  </action>
+  <action name="actionResetRotation">
+   <property name="text">
+    <string>&amp;Reset rotation</string>
+   </property>
+  </action>
+  <action name="actionGotoXYZ">
+   <property name="text">
+    <string>&amp;Go to x,y,z</string>
    </property>
   </action>
  </widget>

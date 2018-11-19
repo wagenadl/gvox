@@ -11,9 +11,9 @@ class PViewer: public QWidget {
 public:
   PViewer(class Voxmap *vm, class IDmap *im, QWidget *parent=0);
   ~PViewer();
-  void showTracings(int txt);
-  void showProjection(int txt);
-  void showOverlay(int txt);
+  void showTracings(int side);
+  void showProjection(int side);
+  void showOverlay(int side, int onlyid=-1);
   virtual void keyPressEvent(QKeyEvent *) override;
 private:
   static int xDirForZAxis(int ax);

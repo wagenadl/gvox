@@ -77,7 +77,7 @@ void PViewer::showDecorated(QImage &img, int zax,
   setWindowTitle(ttl);
 }
 
-void PViewer::showOverlay(int txt) {
+void PViewer::showOverlay(int txt, int onlyid) {
   int arg = txt - 1;
   if (arg<0)
     arg = 1;
@@ -87,7 +87,7 @@ void PViewer::showOverlay(int txt) {
   int ydir = yDirForZAxis(zax);
   if (zdir<0)
     xdir = -xdir;
-  QImage img = proj->overlay(zax, zdir, xdir, ydir);
+  QImage img = proj->overlay(zax, zdir, xdir, ydir, onlyid);
 
   showDecorated(img, zax, zdir, xdir, ydir);
 }
