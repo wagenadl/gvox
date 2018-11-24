@@ -11,10 +11,10 @@ MAKEFILE      = Makefile.Debug
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
+DEFINES       = -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -g -std=gnu++11 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I. -isystem /usr/include/x86_64-linux-gnu/qt5 -isystem /usr/include/x86_64-linux-gnu/qt5/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt5/QtGui -isystem /usr/include/x86_64-linux-gnu/qt5/QtCore -Idebug -isystem /usr/include/libdrm -I. -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++
+INCPATH       = -I. -isystem /usr/include/x86_64-linux-gnu/qt5 -isystem /usr/include/x86_64-linux-gnu/qt5/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt5/QtGui -isystem /usr/include/x86_64-linux-gnu/qt5/QtNetwork -isystem /usr/include/x86_64-linux-gnu/qt5/QtCore -Idebug -isystem /usr/include/libdrm -I. -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++
 QMAKE         = /usr/lib/x86_64-linux-gnu/qt5/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -37,7 +37,7 @@ DISTNAME      = gvox1.0.0
 DISTDIR = /home/wagenaar/progs/gvox/gvox/src/debug/gvox1.0.0
 LINK          = g++
 LFLAGS        = 
-LIBS          = $(SUBLIBS) -lQt5Widgets -lQt5Gui -lQt5Core -lGL -lpthread 
+LIBS          = $(SUBLIBS) -lQt5Widgets -lQt5Gui -lQt5Network -lQt5Core -lGL -lpthread 
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -57,8 +57,10 @@ SOURCES       = Voxmap.cpp \
 		PViewer.cpp \
 		Projection.cpp \
 		main.cpp \
-		MainWindow.cpp debug/qrc_docs.cpp \
-		debug/moc_Viewer.cpp
+		MainWindow.cpp \
+		UDPSocket.cpp debug/qrc_docs.cpp \
+		debug/moc_Viewer.cpp \
+		debug/moc_UDPSocket.cpp
 OBJECTS       = debug/Voxmap.o \
 		debug/Viewer.o \
 		debug/Transform3.o \
@@ -68,8 +70,10 @@ OBJECTS       = debug/Voxmap.o \
 		debug/Projection.o \
 		debug/main.o \
 		debug/MainWindow.o \
+		debug/UDPSocket.o \
 		debug/qrc_docs.o \
-		debug/moc_Viewer.o
+		debug/moc_Viewer.o \
+		debug/moc_UDPSocket.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/unix.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/linux.conf \
@@ -162,7 +166,8 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		DistinctColors.h \
 		PViewer.h \
 		Projection.h \
-		MainWindow.h Voxmap.cpp \
+		MainWindow.h \
+		UDPSocket.h Voxmap.cpp \
 		Viewer.cpp \
 		Transform3.cpp \
 		IDmap.cpp \
@@ -170,7 +175,8 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		PViewer.cpp \
 		Projection.cpp \
 		main.cpp \
-		MainWindow.cpp
+		MainWindow.cpp \
+		UDPSocket.cpp
 QMAKE_TARGET  = gvox
 DESTDIR       = 
 TARGET        = gvox
@@ -198,8 +204,8 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents docs.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents Voxmap.h Viewer.h Transform3.h IDmap.h DistinctColors.h PViewer.h Projection.h MainWindow.h $(DISTDIR)/
-	$(COPY_FILE) --parents Voxmap.cpp Viewer.cpp Transform3.cpp IDmap.cpp DistinctColors.cpp PViewer.cpp Projection.cpp main.cpp MainWindow.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents Voxmap.h Viewer.h Transform3.h IDmap.h DistinctColors.h PViewer.h Projection.h MainWindow.h UDPSocket.h $(DISTDIR)/
+	$(COPY_FILE) --parents Voxmap.cpp Viewer.cpp Transform3.cpp IDmap.cpp DistinctColors.cpp PViewer.cpp Projection.cpp main.cpp MainWindow.cpp UDPSocket.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents MainWindow.ui $(DISTDIR)/
 
 
@@ -238,15 +244,20 @@ compiler_moc_predefs_clean:
 debug/moc_predefs.h: /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -std=gnu++11 -Wall -W -dM -E -o debug/moc_predefs.h /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: debug/moc_Viewer.cpp
+compiler_moc_header_make_all: debug/moc_Viewer.cpp debug/moc_UDPSocket.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) debug/moc_Viewer.cpp
+	-$(DEL_FILE) debug/moc_Viewer.cpp debug/moc_UDPSocket.cpp
 debug/moc_Viewer.cpp: Transform3.h \
 		Point.h \
 		Viewer.h \
 		debug/moc_predefs.h \
 		/usr/lib/qt5/bin/moc
-	/usr/lib/qt5/bin/moc $(DEFINES) --include debug/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/wagenaar/progs/gvox/gvox/src -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/x86_64-linux-gnu/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/x86_64-linux-gnu/6/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/6/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include Viewer.h -o debug/moc_Viewer.cpp
+	/usr/lib/qt5/bin/moc $(DEFINES) --include debug/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/wagenaar/progs/gvox/gvox/src -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtNetwork -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/x86_64-linux-gnu/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/x86_64-linux-gnu/6/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/6/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include Viewer.h -o debug/moc_Viewer.cpp
+
+debug/moc_UDPSocket.cpp: UDPSocket.h \
+		debug/moc_predefs.h \
+		/usr/lib/qt5/bin/moc
+	/usr/lib/qt5/bin/moc $(DEFINES) --include debug/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/wagenaar/progs/gvox/gvox/src -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtNetwork -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/x86_64-linux-gnu/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/x86_64-linux-gnu/6/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/6/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include UDPSocket.h -o debug/moc_UDPSocket.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
@@ -280,6 +291,7 @@ debug/Viewer.o: Viewer.cpp Viewer.h \
 		Point.h \
 		Voxmap.h \
 		IDmap.h \
+		IDFactor.h \
 		DistinctColors.h \
 		PViewer.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug/Viewer.o Viewer.cpp
@@ -323,14 +335,21 @@ debug/MainWindow.o: MainWindow.cpp MainWindow.h \
 		Transform3.h \
 		IDmap.h \
 		ui_MainWindow.h \
-		Viewer.h
+		Viewer.h \
+		IDFactor.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug/MainWindow.o MainWindow.cpp
+
+debug/UDPSocket.o: UDPSocket.cpp UDPSocket.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug/UDPSocket.o UDPSocket.cpp
 
 debug/qrc_docs.o: debug/qrc_docs.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug/qrc_docs.o debug/qrc_docs.cpp
 
 debug/moc_Viewer.o: debug/moc_Viewer.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug/moc_Viewer.o debug/moc_Viewer.cpp
+
+debug/moc_UDPSocket.o: debug/moc_UDPSocket.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug/moc_UDPSocket.o debug/moc_UDPSocket.cpp
 
 ####### Install
 

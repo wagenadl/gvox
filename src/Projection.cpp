@@ -101,7 +101,7 @@ static uint8_t *projlut() {
 }
   
 
-QImage Projection::overlay(int ax, int dir, int xdir, int ydir) {
+QImage Projection::overlay(int ax, int dir, int xdir, int ydir, int onlyid) {
   static uint8_t *lut = projlut();
   static DistinctColors dc;
 
@@ -200,7 +200,7 @@ QImage Projection::overlay(int ax, int dir, int xdir, int ydir) {
 	  float gh = gry;
 	  float bh = gry;
 	  float ah = gry*.030;
-	  if (*zisrc) {
+	  if (*zisrc && (onlyid<0 || onlyid==*zisrc)) {
 	    // recolor
 	    uint32_t rgb = dc.color(*zisrc);
 	    ah = 1;

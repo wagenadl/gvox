@@ -31,9 +31,10 @@ public slots:
   void setMode(Mode);
   void setName(QString);
   void doExport();
-  void showOverlay(int);
-  void showProjection(int);
-  void showTraces(int);
+  void showEOverlay(int side, QString id);
+  void showOverlay(int side);
+  void showProjection(int side);
+  void showTraces(int side);
   void copy();
   void add();
   void del();
@@ -46,6 +47,7 @@ public slots:
   void resetRotation();
 signals:
   void selectionChanged(int);
+  void doubleClickedAt(Point3 p, int id);
 protected:
   virtual void mouseMoveEvent(QMouseEvent *) override;
   virtual void keyPressEvent(QKeyEvent *) override;
@@ -87,6 +89,7 @@ private:
   Mode mode;
   View view;
   bool showcross;
+  double thickmod;
 };
 
 #endif

@@ -25,6 +25,9 @@ public:
   int find(QString name) const;
   double metaValue(QString jsonname) const;
   bool hasMetaValue(QString jsonname) const;
+  Point3 umtopix(Point3 um) const;
+  Point3 pixtoum(Point3 px) const;
+  Transform3 const &pixtoumTransform() const { return px2um; }
 public:
   QString basename() const;
   int width() const { return X; }
@@ -93,6 +96,7 @@ private:
   QJsonObject meta;
   QJsonObject names;
   QString jsonFilename;
+  Transform3 um2px, px2um;
 };
 
 #endif
