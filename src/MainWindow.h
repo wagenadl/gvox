@@ -24,6 +24,7 @@ private:
   class Ui_MainWindow *ui;
   class Voxmap *voxmap;
   class IDmap *idmap;
+  class MWData *d;
 };
 
 #endif

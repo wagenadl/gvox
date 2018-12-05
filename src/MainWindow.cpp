@@ -4,6 +4,7 @@
 
 #include "Voxmap.h"
 #include "IDmap.h"
+#include "UDPSocket.h"
 
 #include <QApplication>
 #include <QDebug>
@@ -12,6 +13,11 @@
 #include <QInputDialog>
 #include "ui_MainWindow.h"
 #include "IDFactor.h"
+
+class MWData {
+public:
+  UDPSocket::Client *udpc;
+};
 
 void gotoXYZDialog(Viewer *v) {
   QString xyz = QInputDialog::getText(0, "Goto position", "X, Y, Z (μm):");
@@ -63,6 +69,8 @@ void showAbout() {
 }
 
 MainWindow::MainWindow() {
+  d = new MWData;
+  d->udpc = new UDPSocket::Client(UDPSocket::sbemPath());
   voxmap = 0;
   idmap = 0;
   ui = new Ui_MainWindow();
@@ -176,6 +184,15 @@ MainWindow::MainWindow() {
                           ui->pdel->setEnabled(i>0 && ui->erase->isChecked());
                           ui->name->setText(voxmap->name(i));
           });
+  connect(ui->viewer, &Viewer::doubleClickedAt,
+          [this](Point3 p, int id) {
+            UDPSocket::Message msg;
+            msg.x = p.x;
+            msg.y = p.y;
+            msg.z = p.z;
+            msg.id = id;
+            d->udpc->sendMessage(msg);
+          });
   connect(ui->name, &QLineEdit::editingFinished,
           [this]() { ui->viewer->setName(ui->name->text()); });
 
@@ -195,6 +212,7 @@ MainWindow::MainWindow() {
 }
 
 MainWindow::~MainWindow() {
+  delete d;
   // delete idmap;
   // delete voxmap;
 }

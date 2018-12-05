@@ -3,7 +3,6 @@
 #include "Viewer.h"
 #include "Voxmap.h"
 #include "IDmap.h"
-#include "IDFactor.h"
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QDebug>
@@ -293,6 +292,15 @@ void Viewer::mouseDoubleClickEvent(QMouseEvent *e) {
             if (dx*dx + dy*dy + dz*dz < Rf*Rf)
               idmap->paint(p.x+dx, p.y+dy, p.z+dz, 0);
       message->setText(QString("Ball erased"));
+    } else if (mode==Select) {
+      Point3 pid(tid.apply(Point3(e->pos().x()*1./hidpi_,
+                              e->pos().y()*1./hidpi_, 0)));
+      int id = idmap->getf(pid.x, pid.y, pid.z);
+      Point3 p(t.apply(Point3(e->pos().x()*1./hidpi_,
+                              e->pos().y()*1./hidpi_, 0)));
+      if (voxmap)
+        p = voxmap->pixtoum(p);
+      emit doubleClickedAt(p, id);
     }
     rebuildID();
   } else if (e->button()==Qt::RightButton) {

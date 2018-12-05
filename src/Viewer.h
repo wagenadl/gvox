@@ -47,6 +47,7 @@ public slots:
   void resetRotation();
 signals:
   void selectionChanged(int);
+  void doubleClickedAt(Point3 p, int id);
 protected:
   virtual void mouseMoveEvent(QMouseEvent *) override;
   virtual void keyPressEvent(QKeyEvent *) override;

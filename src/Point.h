@@ -51,7 +51,7 @@ struct iPoint3 {
   iPoint3(uint16_t x=0, uint16_t y=0, uint16_t z=0): x(x), y(y), z(z) {}
 };
 
-inline QDebug &operator<<(QDebug &d, Point3 const &p) {
+inline QDebug operator<<(QDebug d, Point3 const &p) {
   d << p.x << p.y << p.z;
   return d;
 }
