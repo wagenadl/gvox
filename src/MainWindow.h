@@ -20,6 +20,7 @@ private:
   void doLoad();
   void findDialog();
   void rebuildLUT();
+  void substackDialog();
 private:
   class Ui_MainWindow *ui;
   class Voxmap *voxmap;
