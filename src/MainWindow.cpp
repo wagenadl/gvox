@@ -273,11 +273,42 @@ void MainWindow::doLoad() {
                     voxmap->depth()/IDFACTOR);
   idmap->load(voxmap->basename() + ".id-rle");
   idmap->setAutoSaveName(voxmap->basename() + ".id-rle");
-
+  setWindowTitle(QFileInfo(voxmap->basename()).fileName());
   ui->viewer->setVoxmap(voxmap);
   ui->viewer->setIDmap(idmap, IDFACTOR);
   ui->viewer->gotoCenter();
   ui->viewer->resetRotation();
+  QMap<QString, QVector<QAction*>> acts;
+  acts["ypositive"] << ui->actionVentral
+                    << ui->actionOVentral
+                    << ui->actionPVentral
+                    << ui->actionEOVentral;
+  acts["ynegative"] << ui->actionDorsal
+                    << ui->actionODorsal
+                    << ui->actionPDorsal
+                    << ui->actionEODorsal;
+  acts["xnegative"] << ui->actionLeft
+                    << ui->actionOLeft
+                    << ui->actionPLeft
+                    << ui->actionEOLeft;
+  acts["xpositive"] << ui->actionRight
+                    << ui->actionORight
+                    << ui->actionPRight
+                    << ui->actionEORight;
+  acts["zpositive"] << ui->actionAnterior
+                    << ui->actionOAnterior
+                    << ui->actionPAnterior
+                    << ui->actionEOAnterior;
+  acts["znegative"] << ui->actionPosterior
+                    << ui->actionOPosterior
+                    << ui->actionPPosterior
+                    << ui->actionEOPosterior;
+  qDebug() << "Setting action names";
+  for (auto it=acts.begin(); it!=acts.end(); ++it) {
+    qDebug() << "  " << it.key() << ": " << voxmap->label(it.key());
+    for (QAction *a: it.value())
+      a->setText(voxmap->label(it.key()));
+  }
 }
   
 void MainWindow::findDialog() {

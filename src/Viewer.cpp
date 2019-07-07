@@ -221,11 +221,23 @@ void Viewer::showPos(Point3 p) {
 void Viewer::mouseMoveEvent(QMouseEvent *e) {
   qDebug() << "mousemove" << dragbutton << e->buttons();
   if (dragbutton==Qt::LeftButton && dragmods & Qt::ControlModifier) {
-    // control-drag: rotate 3D
-    QPoint delta = e->pos() - dragbase;
     t = t0;
-    t.rotate(-delta.x()/200./hidpi_, -delta.y()/200./hidpi_,
-	     dragbase.x()*1./hidpi_, dragbase.y()*1./hidpi_);
+    if (dragmods & Qt::ShiftModifier) {
+      // control-shift-drag: rotate 2D
+      QPointF center(width()/2., height()/2.);
+      double x = center.x()/hidpi_;
+      double y = center.y()/hidpi_;
+      double phi0 = atan2(dragbase.y() - center.y(),
+                          dragbase.x() - center.x());
+      double phi1 = atan2(e->pos().y() - center.y(),
+                          e->pos().x() - center.x());
+      t.rotatez(phi0 - phi1, x, y);
+    } else {
+      // control-drag: rotate 3D
+      QPoint delta = e->pos() - dragbase;
+      t.rotate(-delta.x()/200./hidpi_, -delta.y()/200./hidpi_,
+               dragbase.x()*1./hidpi_, dragbase.y()*1./hidpi_);
+    }
     showPos(e->pos());
     rebuild();
   } else if (dragbutton==Qt::LeftButton && (dragmods & Qt::ShiftModifier
