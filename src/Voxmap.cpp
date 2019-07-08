@@ -12,12 +12,12 @@
 Voxmap::Voxmap() {
   X = Y = Z = 0;
   ystride = zstride = 0;
-  data = 0;
+  store.resize(0);
+  data = store.data();
   nullval = 0;
 }
 
 Voxmap::~Voxmap() {
-  delete data;
 }
 
 void Voxmap::traverse(QString src, QStringList &out) {
@@ -40,8 +40,8 @@ void Voxmap::traverse(QString src, QStringList &out) {
 
 void Voxmap::clear() {
   X = Y = Z = 0;
-  delete [] data;
-  data = 0;
+  store.resize(0);
+  data = store.data();
   meta = QJsonObject();
   um2px = Transform3();
   px2um = Transform3();
@@ -67,7 +67,8 @@ bool Voxmap::importDir(QString source, QString outbase) {
     return false;
   }
   
-  data = new uint8_t[X*Y*Z];
+  store.resize(X*Y*Z);
+  data = store.data();
   ystride = X;
   zstride = X*Y;
 
@@ -404,3 +405,4 @@ Point3 Voxmap::umtopix(Point3 p) const {
 Point3 Voxmap::pixtoum(Point3 p) const {
   return px2um.apply(p);
 }
+

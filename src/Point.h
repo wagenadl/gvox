@@ -35,7 +35,13 @@ struct Point3 {
     y *= f;
     z *= f;
     return *this;
-  }			       
+  }
+  Point3 &operator+=(Point3 const &p) {
+    x += p.x;
+    y += p.y;
+    z += p.z;
+    return *this;
+  }
 };
 
 inline Point3 operator-(Point3 const &a, Point3 const &b) {
@@ -51,7 +57,7 @@ struct iPoint3 {
   iPoint3(uint16_t x=0, uint16_t y=0, uint16_t z=0): x(x), y(y), z(z) {}
 };
 
-inline QDebug &operator<<(QDebug &d, Point3 const &p) {
+inline QDebug operator<<(QDebug d, Point3 const &p) {
   d << p.x << p.y << p.z;
   return d;
 }

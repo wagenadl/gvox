@@ -1,0 +1,195 @@
+<!DOCTYPE vsdscopeTrial>
+<vsdscopeTrial>
+ <settings>
+  <category id="acqCCD">
+   <array id="camera">
+    <elt id="Top">
+     <pval id="binning" value="1x1+0+0"/>
+     <pval id="delay" value="100 ms"/>
+     <pval id="dur" value="800 ms"/>
+     <pval id="dutyCycle" value="100%"/>
+     <pval id="enable" value="true"/>
+     <pval id="master" value="self"/>
+     <pval id="portspeed" value="P1S1"/>
+     <pval id="postIllum" value="100 ms"/>
+     <pval id="postShutter" value="100 ms"/>
+     <pval id="preHeat" value="0 s"/>
+     <pval id="preIllum" value="10 ms"/>
+     <pval id="preShutter" value="50 ms"/>
+     <pval id="rate" value="10 Hz"/>
+     <pval id="region" value="512x512+0+0"/>
+    </elt>
+   </array>
+   <pval id="enable" value="true"/>
+  </category>
+  <category id="acqEphys">
+   <pval id="acqFreq" value="10 kHz"/>
+   <pval id="acqTime" value="1.1 s"/>
+   <pval id="aiChannels" value="ME2_Vm ME1_10Vm"/>
+   <category id="vco">
+    <pval id="Dest" value="AO1"/>
+    <pval id="F0" value="130.813 Hz"/>
+    <pval id="Vpp" value="1 V"/>
+    <pval id="dfdv_oct10mV" value="0.5"/>
+    <pval id="tau" value="10 ms"/>
+   </category>
+  </category>
+  <category id="acquisition">
+   <pval id="autoRun" value="false"/>
+   <pval id="contEphys" value="false"/>
+   <pval id="trialPeriod" value="5 min"/>
+  </category>
+  <category id="analysis">
+   <pval id="vsdDelay" value="250 ms"/>
+  </category>
+  <category id="custom">
+   <category id="acqCCD">
+    <category id="camera">
+     <pval id="delay-1" value="1 s"/>
+     <pval id="dur-1" value="5 min"/>
+     <pval id="dutyCycle-1" value="38%"/>
+     <pval id="postIllum-1" value="1 s"/>
+     <pval id="preHeat-1" value="60 s"/>
+     <pval id="preIllum-1" value="1 s"/>
+     <pval id="rate-1" value="10 Hz"/>
+    </category>
+   </category>
+   <category id="acqEphys">
+    <pval id="acqFreq-1" value="50 kHz"/>
+    <pval id="acqTime-1" value="11 s"/>
+    <pval id="trialPeriod-1" value="5 min"/>
+   </category>
+   <category id="acquisition">
+    <pval id="trialPeriod-1" value="12 s"/>
+   </category>
+   <category id="analysis">
+    <pval id="refFreq-1" value="1 Hz"/>
+   </category>
+   <category id="stimEphys">
+    <category id="channel">
+     <pval id="delay-1" value="50 ms"/>
+     <pval id="nPulses-1" value="50"/>
+     <pval id="nTrains-1" value="50"/>
+     <pval id="pulseAmp-1" value="2 V"/>
+     <pval id="pulseAmp2-1" value="-2 V"/>
+     <pval id="pulseDur-1" value="60 s"/>
+     <pval id="pulseDur2-1" value="60 s"/>
+     <pval id="pulsePeriod-1" value="60 s"/>
+     <pval id="trainPeriod-1" value="60 s"/>
+    </category>
+   </category>
+   <category id="stimVideo">
+    <pval id="angle-1" value="0"/>
+    <pval id="delay-1" value="1 s"/>
+    <pval id="dur-1" value="5 min"/>
+    <pval id="frequency-1" value="1 Hz"/>
+    <pval id="wavelength-1" value="10 mm"/>
+    <pval id="xhome-1" value="0 mm"/>
+    <pval id="xscale-1" value="90 mm"/>
+    <pval id="yhome-1" value="0 mm"/>
+    <pval id="yscale-1" value="52.5 mm"/>
+   </category>
+  </category>
+  <category id="maintenance">
+   <category id="checkCam"/>
+   <category id="checkDaq"/>
+   <category id="checkMEA"/>
+   <category id="checkVideo"/>
+   <category id="focus"/>
+   <category id="liveEphys"/>
+  </category>
+  <category id="panelHistory"/>
+  <category id="savedSettings"/>
+  <category id="scripts"/>
+  <category id="stimEphys">
+   <array id="channel">
+    <elt id="AO0">
+     <pval id="delay" value="0 s"/>
+     <pval id="enable" value="false"/>
+     <pval id="nPulses" value="5"/>
+     <pval id="nTrains" value="1"/>
+     <pval id="pulseAmp" value="5 V"/>
+     <pval id="pulseAmp2" value="-5 V"/>
+     <pval id="pulseDur" value="10 ms"/>
+     <pval id="pulseDur2" value="10 ms"/>
+     <pval id="pulsePeriod" value="100 ms"/>
+     <pval id="pulseType" value="Square"/>
+     <pval id="trainPeriod" value="1 s"/>
+    </elt>
+    <elt id="AO1">
+     <pval id="delay" value="0 s"/>
+     <pval id="enable" value="false"/>
+     <pval id="nPulses" value="5"/>
+     <pval id="nTrains" value="1"/>
+     <pval id="pulseAmp" value="5 V"/>
+     <pval id="pulseAmp2" value="-5 V"/>
+     <pval id="pulseDur" value="10 ms"/>
+     <pval id="pulseDur2" value="10 ms"/>
+     <pval id="pulsePeriod" value="100 ms"/>
+     <pval id="pulseType" value="Square"/>
+     <pval id="trainPeriod" value="1 s"/>
+    </elt>
+    <elt id="DO0">
+     <pval id="delay" value="0 s"/>
+     <pval id="enable" value="false"/>
+     <pval id="nPulses" value="5"/>
+     <pval id="nTrains" value="1"/>
+     <pval id="pulseAmp" value="5 V"/>
+     <pval id="pulseAmp2" value="-5 V"/>
+     <pval id="pulseDur" value="10 ms"/>
+     <pval id="pulseDur2" value="10 ms"/>
+     <pval id="pulsePeriod" value="100 ms"/>
+     <pval id="pulseType" value="Square"/>
+     <pval id="trainPeriod" value="1 s"/>
+    </elt>
+    <elt id="DO1">
+     <pval id="delay" value="0 s"/>
+     <pval id="enable" value="false"/>
+     <pval id="nPulses" value="5"/>
+     <pval id="nTrains" value="1"/>
+     <pval id="pulseAmp" value="5 V"/>
+     <pval id="pulseAmp2" value="-5 V"/>
+     <pval id="pulseDur" value="10 ms"/>
+     <pval id="pulseDur2" value="10 ms"/>
+     <pval id="pulsePeriod" value="100 ms"/>
+     <pval id="pulseType" value="Square"/>
+     <pval id="trainPeriod" value="1 s"/>
+    </elt>
+    <elt id="DO2">
+     <pval id="delay" value="0 s"/>
+     <pval id="enable" value="false"/>
+     <pval id="nPulses" value="5"/>
+     <pval id="nTrains" value="1"/>
+     <pval id="pulseAmp" value="5 V"/>
+     <pval id="pulseAmp2" value="-5 V"/>
+     <pval id="pulseDur" value="10 ms"/>
+     <pval id="pulseDur2" value="10 ms"/>
+     <pval id="pulsePeriod" value="100 ms"/>
+     <pval id="pulseType" value="Square"/>
+     <pval id="trainPeriod" value="1 s"/>
+    </elt>
+   </array>
+   <pval id="enable" value="true"/>
+  </category>
+  <category id="stimVideo">
+   <pval id="angle" value="HT"/>
+   <pval id="delay" value="100 ms"/>
+   <pval id="dur" value="10 s"/>
+   <pval id="enable" value="false"/>
+   <pval id="frequency" value="2 Hz"/>
+   <pval id="target" value="All"/>
+   <pval id="type" value="Waves"/>
+   <pval id="wavelength" value="50 mm"/>
+   <pval id="xhome" value="0 mm"/>
+   <pval id="xscale" value="90 mm"/>
+   <pval id="yhome" value="0 mm"/>
+   <pval id="yscale" value="52.5 mm"/>
+  </category>
+ </settings>
+ <info enddate="190707" date="190707" duration="0 s" expt="190707" contephys="0" type="snapshot" endtime="205806" time="205806" trial="001" stim="0"/>
+ <ccd cameras="1">
+  <camera serpix="512" frames="1" parpix="512" name="Top" framedur="100 ms" type="uint16" typebytes="2" delay="50 ms" rate="10 Hz">
+   <transform ax="1" by="512" ay="-1" bx="0"/>
+  </camera>
+ </ccd>
+</vsdscopeTrial>

@@ -4,6 +4,7 @@
 
 #include "Voxmap.h"
 #include "IDmap.h"
+#include "UDPSocket.h"
 
 #include <QApplication>
 #include <QDebug>
@@ -12,6 +13,23 @@
 #include <QInputDialog>
 #include "ui_MainWindow.h"
 #include "IDFactor.h"
+#include "Transform3.h"
+#include "SubstackDialog.h"
+
+
+class MWData {
+public:
+  MWData(): udpc(0), hasmark(false), substackdlg(0) {
+  }
+  void markLocation(Transform3 t) {
+    hasmark = true;
+    markedLocation = t;
+  }
+  UDPSocket::Client *udpc;
+  bool hasmark;
+  Transform3 markedLocation;
+  SubstackDialog *substackdlg;
+};
 
 void gotoXYZDialog(Viewer *v) {
   QString xyz = QInputDialog::getText(0, "Goto position", "X, Y, Z (μm):");
@@ -63,6 +81,8 @@ void showAbout() {
 }
 
 MainWindow::MainWindow() {
+  d = new MWData;
+  d->udpc = new UDPSocket::Client(UDPSocket::sbemPath());
   voxmap = 0;
   idmap = 0;
   ui = new Ui_MainWindow();
@@ -142,6 +162,11 @@ MainWindow::MainWindow() {
   connect(ui->actionGotoXYZ, &QAction::triggered,
           [this]() { gotoXYZDialog(ui->viewer); });
   ui->actionGotoXYZ->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_G));
+  connect(ui->actionMarkLocation,  &QAction::triggered,
+          [this]() { d->markLocation(ui->viewer->currentTransform()); });
+  connect(ui->actionExportSubstack,  &QAction::triggered,
+          [this]() { substackDialog(); });
+  
 
   connect(ui->actionAbout, &QAction::triggered,
           []() { showAbout(); });
@@ -176,6 +201,15 @@ MainWindow::MainWindow() {
                           ui->pdel->setEnabled(i>0 && ui->erase->isChecked());
                           ui->name->setText(voxmap->name(i));
           });
+  connect(ui->viewer, &Viewer::doubleClickedAt,
+          [this](Point3 p, int id) {
+            UDPSocket::Message msg;
+            msg.x = p.x;
+            msg.y = p.y;
+            msg.z = p.z;
+            msg.id = id;
+            d->udpc->sendMessage(msg);
+          });
   connect(ui->name, &QLineEdit::editingFinished,
           [this]() { ui->viewer->setName(ui->name->text()); });
 
@@ -195,6 +229,7 @@ MainWindow::MainWindow() {
 }
 
 MainWindow::~MainWindow() {
+  delete d;
   // delete idmap;
   // delete voxmap;
 }
@@ -255,11 +290,42 @@ void MainWindow::doLoad() {
                     voxmap->depth()/IDFACTOR);
   idmap->load(voxmap->basename() + ".id-rle");
   idmap->setAutoSaveName(voxmap->basename() + ".id-rle");
-
+  setWindowTitle(QFileInfo(voxmap->basename()).fileName());
   ui->viewer->setVoxmap(voxmap);
   ui->viewer->setIDmap(idmap, IDFACTOR);
   ui->viewer->gotoCenter();
   ui->viewer->resetRotation();
+  QMap<QString, QVector<QAction*>> acts;
+  acts["ypositive"] << ui->actionVentral
+                    << ui->actionOVentral
+                    << ui->actionPVentral
+                    << ui->actionEOVentral;
+  acts["ynegative"] << ui->actionDorsal
+                    << ui->actionODorsal
+                    << ui->actionPDorsal
+                    << ui->actionEODorsal;
+  acts["xnegative"] << ui->actionLeft
+                    << ui->actionOLeft
+                    << ui->actionPLeft
+                    << ui->actionEOLeft;
+  acts["xpositive"] << ui->actionRight
+                    << ui->actionORight
+                    << ui->actionPRight
+                    << ui->actionEORight;
+  acts["zpositive"] << ui->actionAnterior
+                    << ui->actionOAnterior
+                    << ui->actionPAnterior
+                    << ui->actionEOAnterior;
+  acts["znegative"] << ui->actionPosterior
+                    << ui->actionOPosterior
+                    << ui->actionPPosterior
+                    << ui->actionEOPosterior;
+  qDebug() << "Setting action names";
+  for (auto it=acts.begin(); it!=acts.end(); ++it) {
+    qDebug() << "  " << it.key() << ": " << voxmap->label(it.key());
+    for (QAction *a: it.value())
+      a->setText(voxmap->label(it.key()));
+  }
 }
   
 void MainWindow::findDialog() {
@@ -272,5 +338,16 @@ void MainWindow::findDialog() {
   } else {
     if (!ui->viewer->find(txt))
       qDebug() << "not found";
+  }
+}
+
+void MainWindow::substackDialog() {
+  if (!d->substackdlg)
+    d->substackdlg = new SubstackDialog(ui->viewer);
+  if (d->hasmark) {
+    d->substackdlg->activate(d->markedLocation);
+  } else {
+    QMessageBox::warning(0, "Substack exporter",
+                         "You need to mark a location first");
   }
 }

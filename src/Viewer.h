@@ -27,8 +27,14 @@ public:
   void setVoxmap(class Voxmap *voxmap);
   void setIDmap(class IDmap *voxmap, int factor);
   int id() const { return paintid; }
+  Transform3 currentTransform() const { return t; }
+  View currentView() const { return view; }
+  Voxmap const *currentVoxmap() const { return voxmap; }
+  IDmap const *currentIDmap() const { return idmap; }
+  int hiDPI() const { return hidpi_; }
 public slots:
   void setMode(Mode);
+  void setTransform(Transform3);
   void setName(QString);
   void doExport();
   void showEOverlay(int side, QString id);
@@ -45,8 +51,10 @@ public slots:
   void gotoCenter();
   void gotoXYZum(double x, double y, double z);
   void resetRotation();
+  void hideMessages(bool);
 signals:
   void selectionChanged(int);
+  void doubleClickedAt(Point3 p, int id);
 protected:
   virtual void mouseMoveEvent(QMouseEvent *) override;
   virtual void keyPressEvent(QKeyEvent *) override;
@@ -88,6 +96,7 @@ private:
   Mode mode;
   View view;
   bool showcross;
+  bool showcompass;
   double thickmod;
 };
 

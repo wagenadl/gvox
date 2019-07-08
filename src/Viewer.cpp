@@ -17,6 +17,7 @@
 #include <QTimerEvent>
 
 Viewer::Viewer(QWidget *parent): QLabel(parent) {
+  showcompass = true;
   thickmod = 1;
   voxmap = 0;
   idmap = 0;
@@ -220,11 +221,23 @@ void Viewer::showPos(Point3 p) {
 
 void Viewer::mouseMoveEvent(QMouseEvent *e) {
   if (dragbutton==Qt::LeftButton && dragmods & Qt::ControlModifier) {
-    // control-drag: rotate 3D
-    QPoint delta = e->pos() - dragbase;
     t = t0;
-    t.rotate(-delta.x()/200./hidpi_, -delta.y()/200./hidpi_,
-	     dragbase.x()*1./hidpi_, dragbase.y()*1./hidpi_);
+    if (dragmods & Qt::ShiftModifier) {
+      // control-shift-drag: rotate 2D
+      QPointF center(width()/2., height()/2.);
+      double x = center.x()/hidpi_;
+      double y = center.y()/hidpi_;
+      double phi0 = atan2(dragbase.y() - center.y(),
+                          dragbase.x() - center.x());
+      double phi1 = atan2(e->pos().y() - center.y(),
+                          e->pos().x() - center.x());
+      t.rotatez(phi0 - phi1, x, y);
+    } else {
+      // control-drag: rotate 3D
+      QPoint delta = e->pos() - dragbase;
+      t.rotate(-delta.x()/200./hidpi_, -delta.y()/200./hidpi_,
+               dragbase.x()*1./hidpi_, dragbase.y()*1./hidpi_);
+    }
     showPos(e->pos());
     rebuild();
   } else if (dragbutton==Qt::LeftButton && (dragmods & Qt::ShiftModifier
@@ -291,6 +304,15 @@ void Viewer::mouseDoubleClickEvent(QMouseEvent *e) {
             if (dx*dx + dy*dy + dz*dz < Rf*Rf)
               idmap->paint(p.x+dx, p.y+dy, p.z+dz, 0);
       message->setText(QString("Ball erased"));
+    } else if (mode==Select) {
+      Point3 pid(tid.apply(Point3(e->pos().x()*1./hidpi_,
+                              e->pos().y()*1./hidpi_, 0)));
+      int id = idmap->getf(pid.x, pid.y, pid.z);
+      Point3 p(t.apply(Point3(e->pos().x()*1./hidpi_,
+                              e->pos().y()*1./hidpi_, 0)));
+      if (voxmap)
+        p = voxmap->pixtoum(p);
+      emit doubleClickedAt(p, id);
     }
     rebuildID();
   } else if (e->button()==Qt::RightButton) {
@@ -315,6 +337,11 @@ void Viewer::resetRotation() {
   }    
 }
 
+void Viewer::setTransform(Transform3 t1) {
+  t = t1;
+  rebuild();
+}
+
 void Viewer::gotoXYZum(double x, double y, double z) {
   Point3 p1 = t.apply(Point3(width()/2./hidpi_, height()/2./hidpi_));
   Point3 p0(x, y, z);
@@ -328,7 +355,6 @@ void Viewer::mousePressEvent(QMouseEvent *e) {
   t0 = t;
   dragbase = e->pos();
   dragbutton = e->button();
-  qDebug() << "mousepress" << dragbutton;
   dragmods = e->modifiers();
   if (dragbutton==Qt::RightButton || mode==Select) {
     Point3 p(tid.apply(Point3(e->pos().x()*1./hidpi_,
@@ -342,7 +368,6 @@ void Viewer::mousePressEvent(QMouseEvent *e) {
 
 void Viewer::mouseReleaseEvent(QMouseEvent *) {
   dragbutton = Qt::NoButton;
-  qDebug() << "mouserelease";
 }
 
 void Viewer::wheelEvent(QWheelEvent *e) {
@@ -504,7 +529,7 @@ inline float len(QPointF x) {
 
 void Viewer::paintEvent(QPaintEvent *e) {
   QLabel::paintEvent(e);
-  if (voxmap) {
+  if (voxmap && showcompass) {
     Transform3 tinv = t.inverse();
     int X = voxmap->width();
     int Y = voxmap->height();
@@ -521,7 +546,6 @@ void Viewer::paintEvent(QPaintEvent *e) {
     dx3 /= dx3.length() + 1e-9;
     dy3 /= dy3.length() + 1e-9;
     dz3 /= dz3.length() + 1e-9;
-
     drawAxis("x", QColor(255,0,0), dx3);
     drawAxis("y", QColor(0,180,0), dy3);
     drawAxis("z", QColor(0,0,255), dz3);
@@ -648,3 +672,15 @@ void Viewer::doExport() {
   }
 }  
 
+void Viewer::hideMessages(bool b) {
+  showcompass = !b;
+  if (!b) 
+    message->show();
+  else
+    message->hide();
+  if (!b) 
+    message2->show();
+  else
+    message2->hide();
+  update();
+}  

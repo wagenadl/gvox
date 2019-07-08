@@ -26,6 +26,8 @@ public:
   void report() const;
   Transform3 inverse() const;
   double det() const;
+  Transform3 delta(Transform3 other) const;
+  void addPartial(Transform3 delta, float fraction);
 public:
   static Transform3 shifter(float dx, float dy, float dz);
   static Transform3 yrotator(float dxz);
