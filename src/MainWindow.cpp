@@ -13,10 +13,22 @@
 #include <QInputDialog>
 #include "ui_MainWindow.h"
 #include "IDFactor.h"
+#include "Transform3.h"
+#include "SubstackDialog.h"
+
 
 class MWData {
 public:
+  MWData(): udpc(0), hasmark(false), substackdlg(0) {
+  }
+  void markLocation(Transform3 t) {
+    hasmark = true;
+    markedLocation = t;
+  }
   UDPSocket::Client *udpc;
+  bool hasmark;
+  Transform3 markedLocation;
+  SubstackDialog *substackdlg;
 };
 
 void gotoXYZDialog(Viewer *v) {
@@ -150,6 +162,11 @@ MainWindow::MainWindow() {
   connect(ui->actionGotoXYZ, &QAction::triggered,
           [this]() { gotoXYZDialog(ui->viewer); });
   ui->actionGotoXYZ->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_G));
+  connect(ui->actionMarkLocation,  &QAction::triggered,
+          [this]() { d->markLocation(ui->viewer->currentTransform()); });
+  connect(ui->actionExportSubstack,  &QAction::triggered,
+          [this]() { substackDialog(); });
+  
 
   connect(ui->actionAbout, &QAction::triggered,
           []() { showAbout(); });
@@ -273,11 +290,42 @@ void MainWindow::doLoad() {
                     voxmap->depth()/IDFACTOR);
   idmap->load(voxmap->basename() + ".id-rle");
   idmap->setAutoSaveName(voxmap->basename() + ".id-rle");
-
+  setWindowTitle(QFileInfo(voxmap->basename()).fileName());
   ui->viewer->setVoxmap(voxmap);
   ui->viewer->setIDmap(idmap, IDFACTOR);
   ui->viewer->gotoCenter();
   ui->viewer->resetRotation();
+  QMap<QString, QVector<QAction*>> acts;
+  acts["ypositive"] << ui->actionVentral
+                    << ui->actionOVentral
+                    << ui->actionPVentral
+                    << ui->actionEOVentral;
+  acts["ynegative"] << ui->actionDorsal
+                    << ui->actionODorsal
+                    << ui->actionPDorsal
+                    << ui->actionEODorsal;
+  acts["xnegative"] << ui->actionLeft
+                    << ui->actionOLeft
+                    << ui->actionPLeft
+                    << ui->actionEOLeft;
+  acts["xpositive"] << ui->actionRight
+                    << ui->actionORight
+                    << ui->actionPRight
+                    << ui->actionEORight;
+  acts["zpositive"] << ui->actionAnterior
+                    << ui->actionOAnterior
+                    << ui->actionPAnterior
+                    << ui->actionEOAnterior;
+  acts["znegative"] << ui->actionPosterior
+                    << ui->actionOPosterior
+                    << ui->actionPPosterior
+                    << ui->actionEOPosterior;
+  qDebug() << "Setting action names";
+  for (auto it=acts.begin(); it!=acts.end(); ++it) {
+    qDebug() << "  " << it.key() << ": " << voxmap->label(it.key());
+    for (QAction *a: it.value())
+      a->setText(voxmap->label(it.key()));
+  }
 }
   
 void MainWindow::findDialog() {
@@ -290,5 +338,16 @@ void MainWindow::findDialog() {
   } else {
     if (!ui->viewer->find(txt))
       qDebug() << "not found";
+  }
+}
+
+void MainWindow::substackDialog() {
+  if (!d->substackdlg)
+    d->substackdlg = new SubstackDialog(ui->viewer);
+  if (d->hasmark) {
+    d->substackdlg->activate(d->markedLocation);
+  } else {
+    QMessageBox::warning(0, "Substack exporter",
+                         "You need to mark a location first");
   }
 }

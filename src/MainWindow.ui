@@ -34,7 +34,7 @@
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
     <addaction name="actionAbout"/>
     <addaction name="actionDocumentation"/>
@@ -100,9 +100,17 @@
     </property>
     <addaction name="actionCopy"/>
    </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>&amp;Tools</string>
+    </property>
+    <addaction name="actionMarkLocation"/>
+    <addaction name="actionExportSubstack"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
+   <addaction name="menuTools"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -498,12 +506,12 @@
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>About</string>
+    <string>&amp;About</string>
    </property>
   </action>
   <action name="actionDocumentation">
    <property name="text">
-    <string>Documentation</string>
+    <string>&amp;Documentation</string>
    </property>
   </action>
   <action name="actionVentral">
@@ -649,6 +657,16 @@
   <action name="actionGotoXYZ">
    <property name="text">
     <string>&amp;Go to x,y,z</string>
+   </property>
+  </action>
+  <action name="actionMarkLocation">
+   <property name="text">
+    <string>&amp;Mark location</string>
+   </property>
+  </action>
+  <action name="actionExportSubstack">
+   <property name="text">
+    <string>&amp;Export substack...</string>
    </property>
   </action>
  </widget>

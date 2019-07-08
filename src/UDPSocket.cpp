@@ -69,7 +69,7 @@ namespace UDPSocket {
     }
     QUdpSocket sock;
     QByteArray data(reinterpret_cast<char const *>(&msg), sizeof(msg));
-    int n = sock.writeDatagram(data, QHostAddress::LocalHost, port);
+    sock.writeDatagram(data, QHostAddress::LocalHost, port);
   }
 };
 

@@ -92,6 +92,7 @@ private:
   int X, Y, Z;
   int ystride, zstride;
   uint8_t *data;
+  QVector<uint8_t> store;
   uint8_t nullval;
   QJsonObject meta;
   QJsonObject names;

@@ -70,8 +70,9 @@ Navigation
 Panning through the volume is done by shift + dragging the mouse for
 movement in the plane parallel to the screen and by shift + scrolling
 the mouse for movement in depth. Rotation in 3D is done by control +
-dragging the mouse. Zooming in and out is done by control + scrolling
-the mouse.
+dragging the mouse. Rotation in the current 2D plane is done by
+control + shift + dragging the mouse.
+Zooming in and out is done by control + scrolling the mouse.
 
 Annotation
 ----------
