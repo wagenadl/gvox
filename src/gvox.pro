@@ -13,5 +13,5 @@ SOURCES += Voxmap.cpp Viewer.cpp Transform3.cpp IDmap.cpp DistinctColors.cpp
 SOURCES += PViewer.cpp Projection.cpp main.cpp
 HEADERS += MainWindow.h   UDPSocket.h   SubstackDialog.h
 SOURCES += MainWindow.cpp UDPSocket.cpp SubstackDialog.cpp
-RESOURCES += docs.qrc
+RESOURCES += docs.qrc dummy.qrc
 FORMS += MainWindow.ui SubstackDialog.ui

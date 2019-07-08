@@ -28,6 +28,10 @@ public:
   void setIDmap(class IDmap *voxmap, int factor);
   int id() const { return paintid; }
   Transform3 currentTransform() const { return t; }
+  View currentView() const { return view; }
+  Voxmap const *currentVoxmap() const { return voxmap; }
+  IDmap const *currentIDmap() const { return idmap; }
+  int hiDPI() const { return hidpi_; }
 public slots:
   void setMode(Mode);
   void setTransform(Transform3);

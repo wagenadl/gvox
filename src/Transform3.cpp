@@ -165,3 +165,19 @@ double Transform3::det() const {
   }
   return d;
 }
+
+Transform3 Transform3::delta(Transform3 other) const {
+  Transform3 t;
+  for (int k=0; k<4; k++)
+    for (int l=0; l<4; l++)
+      t.m[k][l] = other.m[k][l] - m[k][l];
+  return t;
+}
+
+void Transform3::addPartial(Transform3 delta, float frac) {
+  for (int k=0; k<4; k++)
+    for (int l=0; l<4; l++)
+      m[k][l] += frac*delta.m[k][l];
+}
+
+  

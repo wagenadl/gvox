@@ -35,7 +35,13 @@ struct Point3 {
     y *= f;
     z *= f;
     return *this;
-  }			       
+  }
+  Point3 &operator+=(Point3 const &p) {
+    x += p.x;
+    y += p.y;
+    z += p.z;
+    return *this;
+  }
 };
 
 inline Point3 operator-(Point3 const &a, Point3 const &b) {
