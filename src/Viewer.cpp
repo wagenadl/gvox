@@ -3,7 +3,6 @@
 #include "Viewer.h"
 #include "Voxmap.h"
 #include "IDmap.h"
-#include "IDFactor.h"
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QDebug>
@@ -220,7 +219,6 @@ void Viewer::showPos(Point3 p) {
 }
 
 void Viewer::mouseMoveEvent(QMouseEvent *e) {
-  qDebug() << "mousemove" << dragbutton << e->buttons();
   if (dragbutton==Qt::LeftButton && dragmods & Qt::ControlModifier) {
     // control-drag: rotate 3D
     QPoint delta = e->pos() - dragbase;
