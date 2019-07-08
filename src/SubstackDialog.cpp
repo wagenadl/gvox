@@ -178,7 +178,7 @@ public:
     ts << "<vsdscopeROIs>\n";
     ts << " <rois>\n";
     double xfac = 512.0 / plainimg.width();
-    double yfac = 512.0 / plainimg.width();
+    double yfac = 512.0 / plainimg.height();
     Transform3 t0inv = t0.inverse();
     Transform3 t1inv = t1.inverse();
     int fac = viewer->hiDPI();
