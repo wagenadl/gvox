@@ -189,6 +189,7 @@ bool Voxmap::loadFromJson(QString jsonfn) {
   QDir parent(info.dir());
   QString dirname = parent.absolutePath();
   QString base = info.baseName();
+  qDebug() << "fileinfo" << jsonfn << dirname << base;
   if (parent.exists(base + ".data")) {
     meta["base"] = dirname + "/" + base;
   } else {

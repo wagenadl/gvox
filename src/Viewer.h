@@ -32,6 +32,7 @@ public:
   Voxmap const *currentVoxmap() const { return voxmap; }
   IDmap const *currentIDmap() const { return idmap; }
   int hiDPI() const { return hidpi_; }
+  QImage image() const { return image_; }
 public slots:
   void setMode(Mode);
   void setTransform(Transform3);
@@ -98,6 +99,7 @@ private:
   bool showcross;
   bool showcompass;
   double thickmod;
+  QImage image_;
 };
 
 #endif

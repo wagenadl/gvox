@@ -445,6 +445,7 @@ void Viewer::rebuild() {
     im0 = img;
     rebuildID();
   } else {
+    image_ = QImage();
     setPixmap(QPixmap());
   }
 }
@@ -513,8 +514,10 @@ void Viewer::rebuildID() {
     for (int i=0; i<nthreads; i++) {
       delete thr[i];
     }
+    image_ = img;
     setPixmap(QPixmap::fromImage(img.scaled(hidpi_*w, hidpi_*h)));
   } else {
+    image_ = im0;
     setPixmap(QPixmap::fromImage(im0.scaled(hidpi_*w, hidpi_*h)));
   }
 }

@@ -5,6 +5,7 @@
 #include <QAbstractButton>
 #include <QMessageBox>
 #include "IDmap.h"
+#include "Voxmap.h"
 #include <QPainter>
 #include "DistinctColors.h"
 #include <QFileDialog>
@@ -56,9 +57,10 @@ public:
       Transform3 t = t0;
       t.addPartial(delta, n/(steps-.99999));
       viewer->setTransform(t);
-      QPixmap pm(viewer->size());
-      viewer->render(&pm);
-      stack << pm.toImage().convertToFormat(QImage::Format_Grayscale8);
+      QImage img = viewer->image();
+      // (viewer->size());
+      // viewer->render(&pm);
+      stack << img.convertToFormat(QImage::Format_Grayscale8);
     }
     viewer->setTransform(t1);
     viewer->hideMessages(false);
@@ -89,7 +91,7 @@ public:
     Transform3 t1inv = t1.inverse();
     res = res.convertToFormat(QImage::Format_RGB32);
     QPainter ptr(&res);
-    int fac = viewer->hiDPI();
+    int fac = 1; //viewer->hiDPI();
     for (auto it=centerofmass.begin(); it!=centerofmass.end(); ++it) {
       uint16_t k = it.key();
       Point3 v = it.value();
@@ -131,17 +133,39 @@ public:
                            "Could not save " + fn);
     }
   }
+  void insertGVoxCategory(QTextStream &ts) {
+    ts << "<category id=\"gvox\">\n";
+    for (int k=0; k<4; k++)
+      for (int l=0; l<4; l++)
+        ts << QString("<pval id=\"A%1%2\" value=\"%3\"/>\n")
+          .arg(k).arg(l).arg(t0.m[k][l]);
+    for (int k=0; k<4; k++)
+      for (int l=0; l<4; l++)
+        ts << QString("<pval id=\"B%1%2\" value=\"%3\"/>\n")
+          .arg(k).arg(l).arg(t1.m[k][l]);
+    ts << QString("<pval id=\"source\" value=\"%1\"/>\n")
+      .arg(viewer->currentVoxmap()->basename());
+    ts << "</category>\n";
+  }
   bool saveBase(QString basefn) {
     QFile f(basefn + ".xml");
     if (!f.open(QFile::WriteOnly))
       return false;
+    QTextStream ts(&f);
     QFile f0(":dummy.xml");
     f0.open(QFile::ReadOnly);
-    f.write(f0.readAll());
+    QTextStream ts0(&f0);
+    while (!ts0.atEnd()) {
+      QString line = ts0.readLine();
+      ts << line << "\n";
+      if (line.contains("<settings>")) 
+        insertGVoxCategory(ts);
+    }
     return true;
   }
   bool saveImage(QString basefn) {
-    return plainimg.save(basefn + ".jpg");
+    return plainimg.save(basefn + ".jpg")
+      && ui->preview->pixmap()->save(basefn + "-annotated.jpg");
   }
   void writeEmpty(QDataStream &ds) {
     for (int y=0; y<512; y++) {
@@ -181,7 +205,7 @@ public:
     double yfac = 512.0 / plainimg.height();
     Transform3 t0inv = t0.inverse();
     Transform3 t1inv = t1.inverse();
-    int fac = viewer->hiDPI();
+    int fac = 1; // viewer->hiDPI();
     for (auto it=centerofmass.begin(); it!=centerofmass.end(); ++it) {
       uint16_t k = it.key();
       Point3 v = it.value();
